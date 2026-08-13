@@ -2,14 +2,11 @@ import 'package:xml_layout_demo/demo/demo_widgets.dart';
 import 'package:xml_layout_demo/demo/live_xml_playground.dart';
 import 'demo_page.ctrl.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_xml_layout_helpers/flutter_xml_layout_helpers.dart';
+import 'package:flutter_xml_layout_helpers/headers.dart';
 import 'package:provider/provider.dart';
 
 class DemoPage extends StatefulWidget {
-  
-  DemoPage(
-    
-  );
+  DemoPage();
 
   @override
   _DemoPageState createState() => _DemoPageState();
@@ -17,22 +14,21 @@ class DemoPage extends StatefulWidget {
 
 class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
   late DemoController ctrl;
-  
 
   @override
   void initState() {
     super.initState();
     ctrl = DemoController();
-    WidgetsBinding.instance.addPostFrameCallback((_) => mounted ? ctrl.afterFirstBuild(context) : null);
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => mounted ? ctrl.afterFirstBuild(context) : null);
   }
 
   @override
   void didUpdateWidget(DemoPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     ctrl.didUpdateWidgetPreHook(oldWidget);
-    
-    
+
     ctrl.didUpdateWidgetPostHook(oldWidget);
   }
 
@@ -47,7 +43,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
     ctrl.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final pipeProvider = context.watch<PipeProvider>();
@@ -63,14 +59,11 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              DemoHero(
-
-              ),
-              LiveXmlPlayground(
-
-              ),
+              DemoHero(),
+              LiveXmlPlayground(),
               DemoSection(
-                description: ':xxx 前缀的包装属性会自动给 widget 套上 Padding / Opacity / Visibility / SizedBox / Align / Transform / Theme 等容器。',
+                description:
+                    ':xxx 前缀的包装属性会自动给 widget 套上 Padding / Opacity / Visibility / SizedBox / Align / Transform / Theme 等容器。',
                 icon: Icons.auto_awesome,
                 title: '1. Wrapper properties',
                 xml: ctrl.wrappersXml,
@@ -114,8 +107,10 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                           StreamBuilder(
                             initialData: true,
                             stream: ctrl.showSecondStream,
-                            builder: (BuildContext context, ctrlShowSecondStreamSnapshot) {
-                              final ctrlShowSecondStreamValue = ctrlShowSecondStreamSnapshot.data;
+                            builder: (BuildContext context,
+                                ctrlShowSecondStreamSnapshot) {
+                              final ctrlShowSecondStreamValue =
+                                  ctrlShowSecondStreamSnapshot.data;
                               if (ctrlShowSecondStreamValue == null) {
                                 return Container(width: 0, height: 0);
                               }
@@ -263,7 +258,9 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
                             child: Theme(
-                              data: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange)),
+                              data: ThemeData(
+                                  colorScheme: ColorScheme.fromSeed(
+                                      seedColor: Colors.deepOrange)),
                               child: Container(
                                 child: FilledButton(
                                   onPressed: null,
@@ -300,7 +297,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                 ),
               ),
               DemoSection(
-                description: '管道把值转换与 UI 分离：widthPercent/heightPercent 按屏幕比例计算，stream 跟随流更新，自定义管道可带参数。',
+                description:
+                    '管道把值转换与 UI 分离：widthPercent/heightPercent 按屏幕比例计算，stream 跟随流更新，自定义管道可带参数。',
                 icon: Icons.filter_alt,
                 title: '2. Pipes',
                 xml: ctrl.pipesXml,
@@ -317,7 +315,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                         child: Container(
                           color: Colors.green,
                           height: 22,
-                          width: pipeProvider.transform(context, "widthPercent", 80, []),
+                          width: pipeProvider
+                              .transform(context, "widthPercent", 80, []),
                           child: Text(
                             '80%',
                           ),
@@ -335,7 +334,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                       padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                       child: Container(
                         color: Colors.deepOrange,
-                        height: pipeProvider.transform(context, "heightPercent", 3, []),
+                        height: pipeProvider
+                            .transform(context, "heightPercent", 3, []),
                         width: 140,
                       ),
                     ),
@@ -343,7 +343,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                       initialData: '--',
                       stream: ctrl.clockStream,
                       builder: (BuildContext context, ctrlClockStreamSnapshot) {
-                        final ctrlClockStreamValue = ctrlClockStreamSnapshot.data;
+                        final ctrlClockStreamValue =
+                            ctrlClockStreamSnapshot.data;
                         if (ctrlClockStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
@@ -358,8 +359,10 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: 0,
                       stream: ctrl.counterStream,
-                      builder: (BuildContext context, ctrlCounterStreamSnapshot) {
-                        final ctrlCounterStreamValue = ctrlCounterStreamSnapshot.data;
+                      builder:
+                          (BuildContext context, ctrlCounterStreamSnapshot) {
+                        final ctrlCounterStreamValue =
+                            ctrlCounterStreamSnapshot.data;
                         if (ctrlCounterStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
@@ -374,20 +377,28 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                       child: Text(
-                        'custom pipe with args → ' + (pipeProvider.transform(context, "truncate", 'This is a long text', [10])),
+                        'custom pipe with args → ' +
+                            (pipeProvider.transform(context, "truncate",
+                                'This is a long text', [10])),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                       child: Text(
-                        pipeProvider.transform(context, "uppercase", pipeProvider.transform(context, "translate", 'hello', []), []),
+                        pipeProvider.transform(
+                            context,
+                            "uppercase",
+                            pipeProvider
+                                .transform(context, "translate", 'hello', []),
+                            []),
                       ),
                     ),
                   ],
                 ),
               ),
               DemoSection(
-                description: ':if / <if> 元素 / :switch 都支持 stream 管道，可以响应式地切换分支。',
+                description:
+                    ':if / <if> 元素 / :switch 都支持 stream 管道，可以响应式地切换分支。',
                 icon: Icons.alt_route,
                 title: '3. Conditionals',
                 xml: ctrl.conditionalsXml,
@@ -397,52 +408,56 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: true,
                       stream: ctrl.showConditionalStream,
-                      builder: (BuildContext context, ctrlShowConditionalStreamSnapshot) {
-                        final ctrlShowConditionalStreamValue = ctrlShowConditionalStreamSnapshot.data;
+                      builder: (BuildContext context,
+                          ctrlShowConditionalStreamSnapshot) {
+                        final ctrlShowConditionalStreamValue =
+                            ctrlShowConditionalStreamSnapshot.data;
                         if (ctrlShowConditionalStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
-                        return WidgetHelpers.ifTrue(ctrlShowConditionalStreamValue,
-                          () => Text(
-                            ':if → true branch',
-                          ),
-                          () => Container(width: 0, height: 0)
-                        );
+                        return WidgetHelpers.ifTrue(
+                            ctrlShowConditionalStreamValue,
+                            () => Text(
+                                  ':if → true branch',
+                                ),
+                            () => Container(width: 0, height: 0));
                       },
                     ),
                     StreamBuilder(
                       initialData: true,
                       stream: ctrl.showConditionalStream,
-                      builder: (BuildContext context, ctrlShowConditionalStreamSnapshot) {
-                        final ctrlShowConditionalStreamValue = ctrlShowConditionalStreamSnapshot.data;
+                      builder: (BuildContext context,
+                          ctrlShowConditionalStreamSnapshot) {
+                        final ctrlShowConditionalStreamValue =
+                            ctrlShowConditionalStreamSnapshot.data;
                         if (ctrlShowConditionalStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
-                        return WidgetHelpers.ifElseChain([
-                            SwitchCase(
-                              ctrlShowConditionalStreamValue,
-                              () => Text(
-                                '<if> element → true branch',
-                              )
-                            ),
-                            SwitchCase(
-                              false,
-                              () => Text(
-                                '<elseIf>',
-                              )
-                            ),
-                          ],
-                          () => Text(
-                            '<else>',
-                          )
-                        );
+                        return WidgetHelpers.ifElseChain(
+                            [
+                              SwitchCase(
+                                  ctrlShowConditionalStreamValue,
+                                  () => Text(
+                                        '<if> element → true branch',
+                                      )),
+                              SwitchCase(
+                                  false,
+                                  () => Text(
+                                        '<elseIf>',
+                                      )),
+                            ],
+                            () => Text(
+                                  '<else>',
+                                ));
                       },
                     ),
                     StreamBuilder(
                       initialData: 0,
                       stream: ctrl.selectedIndexStream,
-                      builder: (BuildContext context, ctrlSelectedIndexStreamSnapshot) {
-                        final ctrlSelectedIndexStreamValue = ctrlSelectedIndexStreamSnapshot.data;
+                      builder: (BuildContext context,
+                          ctrlSelectedIndexStreamSnapshot) {
+                        final ctrlSelectedIndexStreamValue =
+                            ctrlSelectedIndexStreamSnapshot.data;
                         if (ctrlSelectedIndexStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
@@ -450,26 +465,24 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                           padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                           child: Container(
                             child: WidgetHelpers.switchValue(
-                              ctrlSelectedIndexStreamValue,
-                              () => Container(width: 0, height: 0),
-                              [
-                                SwitchCase(0, 
+                                ctrlSelectedIndexStreamValue,
+                                () => Container(width: 0, height: 0), [
+                              SwitchCase(
+                                  0,
                                   () => Text(
-                                    ':switch → case 0',
-                                  )
-                                ),
-                                SwitchCase(1, 
+                                        ':switch → case 0',
+                                      )),
+                              SwitchCase(
+                                  1,
                                   () => Text(
-                                    ':switch → case 1',
-                                  )
-                                ),
-                                SwitchCase(2, 
+                                        ':switch → case 1',
+                                      )),
+                              SwitchCase(
+                                  2,
                                   () => Text(
-                                    ':switch → case 2',
-                                  )
-                                ),
-                              ]
-                            ),
+                                        ':switch → case 2',
+                                      )),
+                            ]),
                           ),
                         );
                       },
@@ -497,7 +510,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                 ),
               ),
               DemoSection(
-                description: ':repeat 把列表映射成一组 widget；:childBuilder 直接生成 children；:use builder + :itemBuilder 生成 ListView.builder。',
+                description:
+                    ':repeat 把列表映射成一组 widget；:childBuilder 直接生成 children；:use builder + :itemBuilder 生成 ListView.builder。',
                 icon: Icons.list_alt,
                 title: '4. Lists & builders',
                 xml: ctrl.listsXml,
@@ -509,14 +523,13 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     ...WidgetHelpers.mapToWidgetList(ctrl.items, (item, index) {
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 2, 0, 0),
-                          child: Text(
-                            '• ' + item.toString(),
-                          ),
-                        );
-                      }
-                    ),
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 2, 0, 0),
+                        child: Text(
+                          '• ' + item.toString(),
+                        ),
+                      );
+                    }),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                       child: Text(
@@ -527,7 +540,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     SizedBox(
                       height: 56,
                       child: ListView(
-                        children: WidgetHelpers.mapToWidgetList(ctrl.items, (item, index) {
+                        children: WidgetHelpers.mapToWidgetList(ctrl.items,
+                            (item, index) {
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(8, 2, 0, 0),
                             child: Text(
@@ -551,7 +565,11 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                         child: ListView.builder(
                           itemCount: ctrl.demoItems.length,
                           itemBuilder: (BuildContext context, int index) {
-                            final DemoItem item = ctrl.demoItems == null || ctrl.demoItems.length <= index || ctrl.demoItems.length == 0 ? null! : ctrl.demoItems[index];
+                            final DemoItem item = ctrl.demoItems == null ||
+                                    ctrl.demoItems.length <= index ||
+                                    ctrl.demoItems.length == 0
+                                ? null!
+                                : ctrl.demoItems[index];
                             return ListTile(
                               dense: true,
                               leading: CircleAvatar(
@@ -581,13 +599,16 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                       child: StreamBuilder(
                         initialData: null,
                         stream: ctrl.itemsStream,
-                        builder: (BuildContext context, ctrlItemsStreamSnapshot) {
-                          final ctrlItemsStreamValue = ctrlItemsStreamSnapshot.data;
+                        builder:
+                            (BuildContext context, ctrlItemsStreamSnapshot) {
+                          final ctrlItemsStreamValue =
+                              ctrlItemsStreamSnapshot.data;
                           if (ctrlItemsStreamValue == null) {
                             return Container(width: 0, height: 0);
                           }
                           return ListView(
-                            children: WidgetHelpers.mapToWidgetList(ctrlItemsStreamValue, (item, index) {
+                            children: WidgetHelpers.mapToWidgetList(
+                                ctrlItemsStreamValue, (item, index) {
                               return Padding(
                                 padding: const EdgeInsets.fromLTRB(8, 2, 0, 0),
                                 child: Text(
@@ -609,7 +630,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                 ),
               ),
               DemoSection(
-                description: ':formControl + FormGroup 双向绑定表单状态；:formSubmit 在表单无效时自动禁用；校验错误和提交状态通过 stream 展示。',
+                description:
+                    ':formControl + FormGroup 双向绑定表单状态；:formSubmit 在表单无效时自动禁用；校验错误和提交状态通过 stream 展示。',
                 icon: Icons.edit_note,
                 title: '5. Forms',
                 xml: ctrl.formsXml,
@@ -623,22 +645,29 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: ctrl.formGroup.get('name').value,
                       stream: ctrl.formGroup.get('name').valueStream,
-                      builder: (BuildContext context, ctrlFormGroupGetNameValueStreamSnapshot) {
+                      builder: (BuildContext context,
+                          ctrlFormGroupGetNameValueStreamSnapshot) {
                         return TextField(
-                          controller: ctrl._attachController(ctrl.formGroup, 'name', () => TextEditingController()),
-                          decoration: InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
+                          controller: ctrl._attachController(ctrl.formGroup,
+                              'name', () => TextEditingController()),
+                          decoration: InputDecoration(
+                              labelText: 'Name', border: OutlineInputBorder()),
                         );
                       },
                     ),
                     StreamBuilder(
                       initialData: ctrl.formGroup.get('email').value,
                       stream: ctrl.formGroup.get('email').valueStream,
-                      builder: (BuildContext context, ctrlFormGroupGetEmailValueStreamSnapshot) {
+                      builder: (BuildContext context,
+                          ctrlFormGroupGetEmailValueStreamSnapshot) {
                         return Padding(
                           padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                           child: TextField(
-                            controller: ctrl._attachController(ctrl.formGroup, 'email', () => TextEditingController()),
-                            decoration: InputDecoration(labelText: 'Email (required)', border: OutlineInputBorder()),
+                            controller: ctrl._attachController(ctrl.formGroup,
+                                'email', () => TextEditingController()),
+                            decoration: InputDecoration(
+                                labelText: 'Email (required)',
+                                border: OutlineInputBorder()),
                           ),
                         );
                       },
@@ -646,8 +675,10 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: '[]',
                       stream: ctrl.emailErrorStream,
-                      builder: (BuildContext context, ctrlEmailErrorStreamSnapshot) {
-                        final ctrlEmailErrorStreamValue = ctrlEmailErrorStreamSnapshot.data;
+                      builder:
+                          (BuildContext context, ctrlEmailErrorStreamSnapshot) {
+                        final ctrlEmailErrorStreamValue =
+                            ctrlEmailErrorStreamSnapshot.data;
                         if (ctrlEmailErrorStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
@@ -662,11 +693,14 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: ctrl.formGroup.submitEnabled,
                       stream: ctrl.formGroup.submitEnabledStream,
-                      builder: (BuildContext context, ctrlFormGroupSubmitEnabledStreamSnapshot) {
-                        final ctrlFormGroupSubmitEnabledStreamValue = ctrlFormGroupSubmitEnabledStreamSnapshot.data;
+                      builder: (BuildContext context,
+                          ctrlFormGroupSubmitEnabledStreamSnapshot) {
+                        final ctrlFormGroupSubmitEnabledStreamValue =
+                            ctrlFormGroupSubmitEnabledStreamSnapshot.data;
                         return Disable(
                           event: ctrl.formGroup.submit,
-                          value: !((ctrlFormGroupSubmitEnabledStreamValue) == true),
+                          value: !((ctrlFormGroupSubmitEnabledStreamValue) ==
+                              true),
                           builder: (BuildContext context, event) {
                             return Padding(
                               padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
@@ -684,15 +718,19 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: false,
                       stream: ctrl.formGroup.submitEnabledStream,
-                      builder: (BuildContext context, ctrlFormGroupSubmitEnabledStreamSnapshot) {
-                        final ctrlFormGroupSubmitEnabledStreamValue = ctrlFormGroupSubmitEnabledStreamSnapshot.data;
+                      builder: (BuildContext context,
+                          ctrlFormGroupSubmitEnabledStreamSnapshot) {
+                        final ctrlFormGroupSubmitEnabledStreamValue =
+                            ctrlFormGroupSubmitEnabledStreamSnapshot.data;
                         if (ctrlFormGroupSubmitEnabledStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
                         return Padding(
                           padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                           child: Text(
-                            'submit enabled → ' + (ctrlFormGroupSubmitEnabledStreamValue).toString(),
+                            'submit enabled → ' +
+                                (ctrlFormGroupSubmitEnabledStreamValue)
+                                    .toString(),
                           ),
                         );
                       },
@@ -700,8 +738,10 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: '-',
                       stream: ctrl.lastSubmitStream,
-                      builder: (BuildContext context, ctrlLastSubmitStreamSnapshot) {
-                        final ctrlLastSubmitStreamValue = ctrlLastSubmitStreamSnapshot.data;
+                      builder:
+                          (BuildContext context, ctrlLastSubmitStreamSnapshot) {
+                        final ctrlLastSubmitStreamValue =
+                            ctrlLastSubmitStreamSnapshot.data;
                         if (ctrlLastSubmitStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
@@ -717,7 +757,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                 ),
               ),
               DemoSection(
-                description: 'apply-animation 用 tweenMap 驱动属性动画：autoTrigger 自动播放，repeats 循环，也可以通过控制器随时触发。',
+                description:
+                    'apply-animation 用 tweenMap 驱动属性动画：autoTrigger 自动播放，repeats 循环，也可以通过控制器随时触发。',
                 icon: Icons.movie_filter,
                 title: '6. Animation',
                 xml: ctrl.animationXml,
@@ -736,9 +777,12 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                           duration: Duration(milliseconds: 800),
                           key: ctrl._colorAnimKey,
                           tweenMap: {
-                            "color": ColorTween(begin: Colors.orange, end: Colors.blueAccent)
+                            "color": ColorTween(
+                                begin: Colors.orange, end: Colors.blueAccent)
                           },
-                          builderMap: (Map<String, Animation<dynamic>> animations, Widget? child) {
+                          builderMap:
+                              (Map<String, Animation<dynamic>> animations,
+                                  Widget? child) {
                             return Container(
                               color: animations["color"]!.value,
                               height: 44,
@@ -769,7 +813,9 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                             "height": Tween<double>(begin: 40, end: 64),
                             "width": Tween<double>(begin: 120, end: 200)
                           },
-                          builderMap: (Map<String, Animation<dynamic>> animations, Widget? child) {
+                          builderMap:
+                              (Map<String, Animation<dynamic>> animations,
+                                  Widget? child) {
                             return Container(
                               height: animations["height"]!.value,
                               width: animations["width"]!.value,
@@ -789,8 +835,10 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                             StreamBuilder(
                               initialData: false,
                               stream: ctrl.loopingStream,
-                              builder: (BuildContext context, ctrlLoopingStreamSnapshot) {
-                                final ctrlLoopingStreamValue = ctrlLoopingStreamSnapshot.data;
+                              builder: (BuildContext context,
+                                  ctrlLoopingStreamSnapshot) {
+                                final ctrlLoopingStreamValue =
+                                    ctrlLoopingStreamSnapshot.data;
                                 if (ctrlLoopingStreamValue == null) {
                                   return Container(width: 0, height: 0);
                                 }
@@ -830,9 +878,12 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                           duration: Duration(milliseconds: 800),
                           key: ctrl._fadeAnimKey,
                           tweenMap: {
-                            "color": ColorTween(begin: Colors.green, end: Colors.purpleAccent)
+                            "color": ColorTween(
+                                begin: Colors.green, end: Colors.purpleAccent)
                           },
-                          builderMap: (Map<String, Animation<dynamic>> animations, Widget? child) {
+                          builderMap:
+                              (Map<String, Animation<dynamic>> animations,
+                                  Widget? child) {
                             return Container(
                               color: animations["color"]!.value,
                               height: 44,
@@ -855,7 +906,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                 ),
               ),
               DemoSection(
-                description: ':disable 在条件为真时禁用点击事件（onPressed 置空）。初始可用，点 3 次后自动禁用。',
+                description:
+                    ':disable 在条件为真时禁用点击事件（onPressed 置空）。初始可用，点 3 次后自动禁用。',
                 icon: Icons.block,
                 title: '7. Disable',
                 xml: ctrl.disableXml,
@@ -865,8 +917,10 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: false,
                       stream: ctrl.enabledStream,
-                      builder: (BuildContext context, ctrlEnabledStreamSnapshot) {
-                        final ctrlEnabledStreamValue = ctrlEnabledStreamSnapshot.data;
+                      builder:
+                          (BuildContext context, ctrlEnabledStreamSnapshot) {
+                        final ctrlEnabledStreamValue =
+                            ctrlEnabledStreamSnapshot.data;
                         return Disable(
                           event: ctrl.increment,
                           value: ctrlEnabledStreamValue,
@@ -884,8 +938,10 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: 0,
                       stream: ctrl.counterStream,
-                      builder: (BuildContext context, ctrlCounterStreamSnapshot) {
-                        final ctrlCounterStreamValue = ctrlCounterStreamSnapshot.data;
+                      builder:
+                          (BuildContext context, ctrlCounterStreamSnapshot) {
+                        final ctrlCounterStreamValue =
+                            ctrlCounterStreamSnapshot.data;
                         if (ctrlCounterStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
@@ -900,8 +956,10 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: false,
                       stream: ctrl.enabledStream,
-                      builder: (BuildContext context, ctrlEnabledStreamSnapshot) {
-                        final ctrlEnabledStreamValue = ctrlEnabledStreamSnapshot.data;
+                      builder:
+                          (BuildContext context, ctrlEnabledStreamSnapshot) {
+                        final ctrlEnabledStreamValue =
+                            ctrlEnabledStreamSnapshot.data;
                         if (ctrlEnabledStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
@@ -914,7 +972,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                 ),
               ),
               DemoSection(
-                description: ':onTap / :onLongPress 包装属性自动套上 GestureDetector，事件计数通过 stream 管道实时显示。',
+                description:
+                    ':onTap / :onLongPress 包装属性自动套上 GestureDetector，事件计数通过 stream 管道实时显示。',
                 icon: Icons.touch_app,
                 title: '8. Events & gestures',
                 xml: ctrl.eventsXml,
@@ -924,8 +983,10 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: 0,
                       stream: ctrl.tapCountStream,
-                      builder: (BuildContext context, ctrlTapCountStreamSnapshot) {
-                        final ctrlTapCountStreamValue = ctrlTapCountStreamSnapshot.data;
+                      builder:
+                          (BuildContext context, ctrlTapCountStreamSnapshot) {
+                        final ctrlTapCountStreamValue =
+                            ctrlTapCountStreamSnapshot.data;
                         if (ctrlTapCountStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
@@ -937,15 +998,18 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: 0,
                       stream: ctrl.longPressCountStream,
-                      builder: (BuildContext context, ctrlLongPressCountStreamSnapshot) {
-                        final ctrlLongPressCountStreamValue = ctrlLongPressCountStreamSnapshot.data;
+                      builder: (BuildContext context,
+                          ctrlLongPressCountStreamSnapshot) {
+                        final ctrlLongPressCountStreamValue =
+                            ctrlLongPressCountStreamSnapshot.data;
                         if (ctrlLongPressCountStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
                         return Padding(
                           padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                           child: Text(
-                            'long presses → ' + (ctrlLongPressCountStreamValue).toString(),
+                            'long presses → ' +
+                                (ctrlLongPressCountStreamValue).toString(),
                           ),
                         );
                       },
@@ -989,7 +1053,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                 ),
               ),
               DemoSection(
-                description: ':stream 包装属性把任意 Stream 变成响应式数据源，子 widget 通过流里的值自由切换。',
+                description:
+                    ':stream 包装属性把任意 Stream 变成响应式数据源，子 widget 通过流里的值自由切换。',
                 icon: Icons.bolt,
                 title: '9. Streams & reactivity',
                 xml: ctrl.streamsXml,
@@ -1001,8 +1066,10 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                       child: StreamBuilder(
                         initialData: 0,
                         stream: ctrl.selectedTabStream,
-                        builder: (BuildContext context, ctrlSelectedTabStreamSnapshot) {
-                          final selectedTabValue = ctrlSelectedTabStreamSnapshot.data;
+                        builder: (BuildContext context,
+                            ctrlSelectedTabStreamSnapshot) {
+                          final selectedTabValue =
+                              ctrlSelectedTabStreamSnapshot.data;
                           return Stack(
                             children: [
                               Opacity(
@@ -1066,7 +1133,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                 ),
               ),
               DemoSection(
-                description: ':consumer 从 Provider 树取数据，子 widget 通过变量直接使用（这里是 PipeProvider）。',
+                description:
+                    ':consumer 从 Provider 树取数据，子 widget 通过变量直接使用（这里是 PipeProvider）。',
                 icon: Icons.account_tree,
                 title: '10. Consumer & Provider',
                 xml: ctrl.consumerXml,
@@ -1078,15 +1146,18 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     Consumer<PipeProvider>(
-                      builder: (BuildContext context, PipeProvider pipeProvider, Widget? child) {
+                      builder: (BuildContext context, PipeProvider pipeProvider,
+                          Widget? child) {
                         return Padding(
                           padding: const EdgeInsets.all(8),
                           child: Container(
                             color: Colors.orange,
                             height: 26,
-                            width: pipeProvider.transform(context, "widthPercent", 60, []),
+                            width: pipeProvider
+                                .transform(context, "widthPercent", 60, []),
                             child: Text(
-                              pipeProvider.transform(context, 'widthPercent', 60, []).toString(),
+                              pipeProvider.transform(
+                                  context, 'widthPercent', 60, []).toString(),
                             ),
                           ),
                         );
@@ -1096,7 +1167,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                 ),
               ),
               DemoSection(
-                description: 'lib/i18n/*.json 自动生成本地化类，translate 管道按当前 Locale 取翻译，按钮可切换中英文。',
+                description:
+                    'lib/i18n/*.json 自动生成本地化类，translate 管道按当前 Locale 取翻译，按钮可切换中英文。',
                 icon: Icons.translate,
                 title: '11. i18n',
                 xml: ctrl.i18nXml,
@@ -1104,19 +1176,25 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'translate → ' + (pipeProvider.transform(context, "translate", 'hello', [])),
+                      'translate → ' +
+                          (pipeProvider
+                              .transform(context, "translate", 'hello', [])),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                       child: Text(
-                        'translate → ' + (pipeProvider.transform(context, "translate", 'goodbye', [])),
+                        'translate → ' +
+                            (pipeProvider.transform(
+                                context, "translate", 'goodbye', [])),
                       ),
                     ),
                     StreamBuilder(
                       initialData: 'en',
                       stream: ctrl.localeNameStream,
-                      builder: (BuildContext context, ctrlLocaleNameStreamSnapshot) {
-                        final ctrlLocaleNameStreamValue = ctrlLocaleNameStreamSnapshot.data;
+                      builder:
+                          (BuildContext context, ctrlLocaleNameStreamSnapshot) {
+                        final ctrlLocaleNameStreamValue =
+                            ctrlLocaleNameStreamSnapshot.data;
                         if (ctrlLocaleNameStreamValue == null) {
                           return Container(width: 0, height: 0);
                         }
@@ -1194,14 +1272,18 @@ class DemoControllerBase {
   bool _loaded = false;
   final formGroup = FormGroup();
   final _colorAnimKey = GlobalKey<AnimationBuilderState>();
-  AnimationBuilderStateMixin? get colorAnim => _colorAnimKey.currentState as AnimationBuilderStateMixin?;
+  AnimationBuilderStateMixin? get colorAnim =>
+      _colorAnimKey.currentState as AnimationBuilderStateMixin?;
   final _sizeAnimKey = GlobalKey<AnimationBuilderState>();
-  AnimationBuilderStateMixin? get sizeAnim => _sizeAnimKey.currentState as AnimationBuilderStateMixin?;
+  AnimationBuilderStateMixin? get sizeAnim =>
+      _sizeAnimKey.currentState as AnimationBuilderStateMixin?;
   final _fadeAnimKey = GlobalKey<AnimationBuilderState>();
-  AnimationBuilderStateMixin? get fadeAnim => _fadeAnimKey.currentState as AnimationBuilderStateMixin?;
+  AnimationBuilderStateMixin? get fadeAnim =>
+      _fadeAnimKey.currentState as AnimationBuilderStateMixin?;
   Map<String, dynamic> _attachedControllers = <String, dynamic>{};
 
-  dynamic _attachController(FormGroup formGroup, String controlName, controllerBuilder) {
+  dynamic _attachController(
+      FormGroup formGroup, String controlName, controllerBuilder) {
     if (_attachedControllers.containsKey(controlName)) {
       final controller = _attachedControllers[controlName];
       return controller;
@@ -1217,25 +1299,19 @@ class DemoControllerBase {
       _loaded = true;
       didLoad(context);
     }
-    
+
     onBuild(context);
   }
 
-  void didLoad(BuildContext context) {
-  }
+  void didLoad(BuildContext context) {}
 
-  void onBuild(BuildContext context) {
-  }
+  void onBuild(BuildContext context) {}
 
-  void afterFirstBuild(BuildContext context) {
-  }
-  
+  void afterFirstBuild(BuildContext context) {}
 
-  void didUpdateWidgetPreHook(dynamic oldWidget) {
-  }
-  void didUpdateWidgetPostHook(dynamic oldWidget) {
-  }
-  
+  void didUpdateWidgetPreHook(dynamic oldWidget) {}
+  void didUpdateWidgetPostHook(dynamic oldWidget) {}
+
   @mustCallSuper
   void dispose() {
     formGroup.dispose();

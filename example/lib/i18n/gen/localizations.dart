@@ -18,13 +18,7 @@ class AppLocalizations {
   }
 
   static Map<String, Map<String, String>> _localizedValues = {
-    "en": {
-      "hello": "Hello from i18n",
-      "goodbye": "Goodbye"
-    },
-    "zh": {
-      "hello": "来自 i18n 的问候",
-      "goodbye": "再见"
-    }
+    "en": {"hello": "Hello from i18n", "goodbye": "Goodbye"},
+    "zh": {"hello": "来自 i18n 的问候", "goodbye": "再见"}
   };
 }
