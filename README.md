@@ -31,8 +31,13 @@ Migrating from `flutter_xmllayout_helpers`:
 
 ```yaml
 dependencies:
-  flutter_xml_layout_helpers: ^0.1.0
+  flutter_xml_layout_helpers:
+    git:
+      url: https://github.com/zhoulijun12315/flutter-xml-layout-helpers.git
 ```
+
+> Once published to pub.dev, use `flutter_xml_layout_helpers: ^0.1.0` instead
+> of the git dependency.
 
 ```dart
 import 'package:flutter_xml_layout_helpers/flutter_xml_layout_helpers.dart';
