@@ -31,13 +31,13 @@ flutter run -d chrome
 From the `flutter-xml-layout` generator repo:
 
 ```sh
-npx tsc -p tools/tsconfig.build.json
-node .tools-out/tools/generate.js generate ../flutter-xml-layout-helpers/example
+fxml generate ../flutter-xml-layout-helpers/example
 ```
 
 This regenerates `demo_page.xml.dart` (and creates `demo_page.ctrl.dart` only
 if it does not exist) plus `lib/i18n/gen/*`. Add `--json` for machine-readable
-output or use `watch` instead of `generate` to regenerate on file changes.
+output or use `fxml watch` to regenerate on file changes. Requires the
+`fxml` command (`npm link` in the flutter-xml-layout repo, see its README).
 
 ## GitHub Pages
 
