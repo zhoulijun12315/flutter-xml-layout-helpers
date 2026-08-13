@@ -40,7 +40,20 @@ dependencies:
 > of the git dependency.
 
 ```dart
-import 'package:flutter_xml_layout_helpers/flutter_xml_layout_helpers.dart';
+import 'package:flutter_xml_layout_helpers/headers.dart';
+```
+
+**One import for everything.** `headers.dart` (or the equivalent main library
+`flutter_xml_layout_helpers.dart`) exports every class: `PipeProvider`, `Pipe`,
+`FormControl`, `FormGroup`, `Validators`, `WidgetHelpers`, `Disable`,
+`AnimationBuilder` and friends. You never need deep imports like
+`providers/PipeProvider.dart`.
+
+Migrating old scattered imports in one shot:
+
+```sh
+find lib -name '*.dart' -print0 | xargs -0 sed -i '' \
+  's#package:flutter_xmllayout_helpers/[^"]*#package:flutter_xml_layout_helpers/headers.dart#g'
 ```
 
 > **Note on rxdart:** this package no longer depends on `rxdart`. The

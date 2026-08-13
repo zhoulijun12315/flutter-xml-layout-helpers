@@ -15,11 +15,8 @@ class WidgetHelpers {
     return result;
   }
 
-  static Widget ifTrue(
-    bool condition,
-    Widget Function() trueWidget,
-    [Widget Function()? falseWidget]
-  ) {
+  static Widget ifTrue(bool condition, Widget Function() trueWidget,
+      [Widget Function()? falseWidget]) {
     if (condition) {
       return trueWidget();
     }

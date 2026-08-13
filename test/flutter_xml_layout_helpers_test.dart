@@ -3,9 +3,17 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_xml_layout_helpers/flutter_xml_layout_helpers.dart';
+import 'package:flutter_xml_layout_helpers/headers.dart' as headers;
 import 'package:flutter_xml_layout_helpers/src/value_stream.dart';
 
 void main() {
+  test('headers.dart exposes the whole package', () {
+    expect(headers.PipeProvider, isA<Type>());
+    expect(headers.FormGroup, isA<Type>());
+    expect(headers.WidgetHelpers, isA<Type>());
+    expect(headers.AnimationBuilder, isA<Type>());
+  });
+
   group('ValueStream', () {
     test('holds the latest value and emits changes', () async {
       final stream = ValueStream<int>(0);
