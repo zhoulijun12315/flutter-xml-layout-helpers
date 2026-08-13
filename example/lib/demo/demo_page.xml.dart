@@ -22,7 +22,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    ctrl = new DemoController();
+    ctrl = DemoController();
     WidgetsBinding.instance.addPostFrameCallback((_) => mounted ? ctrl.afterFirstBuild(context) : null);
   }
 
@@ -50,8 +50,8 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
   
   @override
   Widget build(BuildContext context) {
-    final _pipeProvider = Provider.of<PipeProvider>(context);
-    final __widget = Scaffold(
+    final pipeProvider = context.watch<PipeProvider>();
+    final layout = Scaffold(
       appBar: AppBar(
         title: Text(
           'XML Layout for Flutter — Demo',
@@ -114,7 +114,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                           StreamBuilder(
                             initialData: true,
                             stream: ctrl.showSecondStream,
-                            builder: (BuildContext context, dynamic ctrlShowSecondStreamSnapshot) {
+                            builder: (BuildContext context, ctrlShowSecondStreamSnapshot) {
                               final ctrlShowSecondStreamValue = ctrlShowSecondStreamSnapshot.data;
                               if (ctrlShowSecondStreamValue == null) {
                                 return Container(width: 0, height: 0);
@@ -317,7 +317,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                         child: Container(
                           color: Colors.green,
                           height: 22,
-                          width: _pipeProvider.transform(context, "widthPercent", 80, []),
+                          width: pipeProvider.transform(context, "widthPercent", 80, []),
                           child: Text(
                             '80%',
                           ),
@@ -335,14 +335,14 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                       padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                       child: Container(
                         color: Colors.deepOrange,
-                        height: _pipeProvider.transform(context, "heightPercent", 3, []),
+                        height: pipeProvider.transform(context, "heightPercent", 3, []),
                         width: 140,
                       ),
                     ),
                     StreamBuilder(
                       initialData: '--',
                       stream: ctrl.clockStream,
-                      builder: (BuildContext context, dynamic ctrlClockStreamSnapshot) {
+                      builder: (BuildContext context, ctrlClockStreamSnapshot) {
                         final ctrlClockStreamValue = ctrlClockStreamSnapshot.data;
                         if (ctrlClockStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -358,7 +358,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: 0,
                       stream: ctrl.counterStream,
-                      builder: (BuildContext context, dynamic ctrlCounterStreamSnapshot) {
+                      builder: (BuildContext context, ctrlCounterStreamSnapshot) {
                         final ctrlCounterStreamValue = ctrlCounterStreamSnapshot.data;
                         if (ctrlCounterStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -374,13 +374,13 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                       child: Text(
-                        'custom pipe with args → ' + (_pipeProvider.transform(context, "truncate", 'This is a long text', [10])),
+                        'custom pipe with args → ' + (pipeProvider.transform(context, "truncate", 'This is a long text', [10])),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                       child: Text(
-                        _pipeProvider.transform(context, "uppercase", _pipeProvider.transform(context, "translate", 'hello', []), []),
+                        pipeProvider.transform(context, "uppercase", pipeProvider.transform(context, "translate", 'hello', []), []),
                       ),
                     ),
                   ],
@@ -397,7 +397,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: true,
                       stream: ctrl.showConditionalStream,
-                      builder: (BuildContext context, dynamic ctrlShowConditionalStreamSnapshot) {
+                      builder: (BuildContext context, ctrlShowConditionalStreamSnapshot) {
                         final ctrlShowConditionalStreamValue = ctrlShowConditionalStreamSnapshot.data;
                         if (ctrlShowConditionalStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -413,7 +413,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: true,
                       stream: ctrl.showConditionalStream,
-                      builder: (BuildContext context, dynamic ctrlShowConditionalStreamSnapshot) {
+                      builder: (BuildContext context, ctrlShowConditionalStreamSnapshot) {
                         final ctrlShowConditionalStreamValue = ctrlShowConditionalStreamSnapshot.data;
                         if (ctrlShowConditionalStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -441,7 +441,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: 0,
                       stream: ctrl.selectedIndexStream,
-                      builder: (BuildContext context, dynamic ctrlSelectedIndexStreamSnapshot) {
+                      builder: (BuildContext context, ctrlSelectedIndexStreamSnapshot) {
                         final ctrlSelectedIndexStreamValue = ctrlSelectedIndexStreamSnapshot.data;
                         if (ctrlSelectedIndexStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -453,17 +453,17 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                               ctrlSelectedIndexStreamValue,
                               () => Container(width: 0, height: 0),
                               [
-                                new SwitchCase(0, 
+                                SwitchCase(0, 
                                   () => Text(
                                     ':switch → case 0',
                                   )
                                 ),
-                                new SwitchCase(1, 
+                                SwitchCase(1, 
                                   () => Text(
                                     ':switch → case 1',
                                   )
                                 ),
-                                new SwitchCase(2, 
+                                SwitchCase(2, 
                                   () => Text(
                                     ':switch → case 2',
                                   )
@@ -551,7 +551,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                         child: ListView.builder(
                           itemCount: ctrl.demoItems.length,
                           itemBuilder: (BuildContext context, int index) {
-                            final DemoItem item = (ctrl.demoItems as dynamic) == null || ctrl.demoItems.length <= index || ctrl.demoItems.length == 0 ? null! : ctrl.demoItems[index];
+                            final DemoItem item = ctrl.demoItems == null || ctrl.demoItems.length <= index || ctrl.demoItems.length == 0 ? null! : ctrl.demoItems[index];
                             return ListTile(
                               dense: true,
                               leading: CircleAvatar(
@@ -581,7 +581,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                       child: StreamBuilder(
                         initialData: null,
                         stream: ctrl.itemsStream,
-                        builder: (BuildContext context, dynamic ctrlItemsStreamSnapshot) {
+                        builder: (BuildContext context, ctrlItemsStreamSnapshot) {
                           final ctrlItemsStreamValue = ctrlItemsStreamSnapshot.data;
                           if (ctrlItemsStreamValue == null) {
                             return Container(width: 0, height: 0);
@@ -623,7 +623,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: ctrl.formGroup.get('name').value,
                       stream: ctrl.formGroup.get('name').valueStream,
-                      builder: (BuildContext context, dynamic ctrlFormGroupGetNameValueStreamSnapshot) {
+                      builder: (BuildContext context, ctrlFormGroupGetNameValueStreamSnapshot) {
                         return TextField(
                           controller: ctrl._attachController(ctrl.formGroup, 'name', () => TextEditingController()),
                           decoration: InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
@@ -633,7 +633,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: ctrl.formGroup.get('email').value,
                       stream: ctrl.formGroup.get('email').valueStream,
-                      builder: (BuildContext context, dynamic ctrlFormGroupGetEmailValueStreamSnapshot) {
+                      builder: (BuildContext context, ctrlFormGroupGetEmailValueStreamSnapshot) {
                         return Padding(
                           padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                           child: TextField(
@@ -646,7 +646,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: '[]',
                       stream: ctrl.emailErrorStream,
-                      builder: (BuildContext context, dynamic ctrlEmailErrorStreamSnapshot) {
+                      builder: (BuildContext context, ctrlEmailErrorStreamSnapshot) {
                         final ctrlEmailErrorStreamValue = ctrlEmailErrorStreamSnapshot.data;
                         if (ctrlEmailErrorStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -662,11 +662,11 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: ctrl.formGroup.submitEnabled,
                       stream: ctrl.formGroup.submitEnabledStream,
-                      builder: (BuildContext context, dynamic ctrlFormGroupSubmitEnabledStreamSnapshot) {
+                      builder: (BuildContext context, ctrlFormGroupSubmitEnabledStreamSnapshot) {
                         final ctrlFormGroupSubmitEnabledStreamValue = ctrlFormGroupSubmitEnabledStreamSnapshot.data;
                         return Disable(
                           event: ctrl.formGroup.submit,
-                          value: !(ctrlFormGroupSubmitEnabledStreamValue),
+                          value: !((ctrlFormGroupSubmitEnabledStreamValue) == true),
                           builder: (BuildContext context, event) {
                             return Padding(
                               padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
@@ -684,7 +684,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: false,
                       stream: ctrl.formGroup.submitEnabledStream,
-                      builder: (BuildContext context, dynamic ctrlFormGroupSubmitEnabledStreamSnapshot) {
+                      builder: (BuildContext context, ctrlFormGroupSubmitEnabledStreamSnapshot) {
                         final ctrlFormGroupSubmitEnabledStreamValue = ctrlFormGroupSubmitEnabledStreamSnapshot.data;
                         if (ctrlFormGroupSubmitEnabledStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -700,7 +700,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: '-',
                       stream: ctrl.lastSubmitStream,
-                      builder: (BuildContext context, dynamic ctrlLastSubmitStreamSnapshot) {
+                      builder: (BuildContext context, ctrlLastSubmitStreamSnapshot) {
                         final ctrlLastSubmitStreamValue = ctrlLastSubmitStreamSnapshot.data;
                         if (ctrlLastSubmitStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -789,7 +789,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                             StreamBuilder(
                               initialData: false,
                               stream: ctrl.loopingStream,
-                              builder: (BuildContext context, dynamic ctrlLoopingStreamSnapshot) {
+                              builder: (BuildContext context, ctrlLoopingStreamSnapshot) {
                                 final ctrlLoopingStreamValue = ctrlLoopingStreamSnapshot.data;
                                 if (ctrlLoopingStreamValue == null) {
                                   return Container(width: 0, height: 0);
@@ -865,7 +865,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: false,
                       stream: ctrl.enabledStream,
-                      builder: (BuildContext context, dynamic ctrlEnabledStreamSnapshot) {
+                      builder: (BuildContext context, ctrlEnabledStreamSnapshot) {
                         final ctrlEnabledStreamValue = ctrlEnabledStreamSnapshot.data;
                         return Disable(
                           event: ctrl.increment,
@@ -884,7 +884,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: 0,
                       stream: ctrl.counterStream,
-                      builder: (BuildContext context, dynamic ctrlCounterStreamSnapshot) {
+                      builder: (BuildContext context, ctrlCounterStreamSnapshot) {
                         final ctrlCounterStreamValue = ctrlCounterStreamSnapshot.data;
                         if (ctrlCounterStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -900,7 +900,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: false,
                       stream: ctrl.enabledStream,
-                      builder: (BuildContext context, dynamic ctrlEnabledStreamSnapshot) {
+                      builder: (BuildContext context, ctrlEnabledStreamSnapshot) {
                         final ctrlEnabledStreamValue = ctrlEnabledStreamSnapshot.data;
                         if (ctrlEnabledStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -924,7 +924,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: 0,
                       stream: ctrl.tapCountStream,
-                      builder: (BuildContext context, dynamic ctrlTapCountStreamSnapshot) {
+                      builder: (BuildContext context, ctrlTapCountStreamSnapshot) {
                         final ctrlTapCountStreamValue = ctrlTapCountStreamSnapshot.data;
                         if (ctrlTapCountStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -937,7 +937,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                     StreamBuilder(
                       initialData: 0,
                       stream: ctrl.longPressCountStream,
-                      builder: (BuildContext context, dynamic ctrlLongPressCountStreamSnapshot) {
+                      builder: (BuildContext context, ctrlLongPressCountStreamSnapshot) {
                         final ctrlLongPressCountStreamValue = ctrlLongPressCountStreamSnapshot.data;
                         if (ctrlLongPressCountStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -1084,7 +1084,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                           child: Container(
                             color: Colors.orange,
                             height: 26,
-                            width: _pipeProvider.transform(context, "widthPercent", 60, []),
+                            width: pipeProvider.transform(context, "widthPercent", 60, []),
                             child: Text(
                               pipeProvider.transform(context, 'widthPercent', 60, []).toString(),
                             ),
@@ -1104,18 +1104,18 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'translate → ' + (_pipeProvider.transform(context, "translate", 'hello', [])),
+                      'translate → ' + (pipeProvider.transform(context, "translate", 'hello', [])),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                       child: Text(
-                        'translate → ' + (_pipeProvider.transform(context, "translate", 'goodbye', [])),
+                        'translate → ' + (pipeProvider.transform(context, "translate", 'goodbye', [])),
                       ),
                     ),
                     StreamBuilder(
                       initialData: 'en',
                       stream: ctrl.localeNameStream,
-                      builder: (BuildContext context, dynamic ctrlLocaleNameStreamSnapshot) {
+                      builder: (BuildContext context, ctrlLocaleNameStreamSnapshot) {
                         final ctrlLocaleNameStreamValue = ctrlLocaleNameStreamSnapshot.data;
                         if (ctrlLocaleNameStreamValue == null) {
                           return Container(width: 0, height: 0);
@@ -1186,20 +1186,20 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
         ),
       ),
     );
-    return __widget;
+    return layout;
   }
 }
 
 class DemoControllerBase {
   bool _loaded = false;
-  final formGroup = new FormGroup();
-  final _colorAnimKey = new GlobalKey<AnimationBuilderState>();
+  final formGroup = FormGroup();
+  final _colorAnimKey = GlobalKey<AnimationBuilderState>();
   AnimationBuilderStateMixin? get colorAnim => _colorAnimKey.currentState as AnimationBuilderStateMixin?;
-  final _sizeAnimKey = new GlobalKey<AnimationBuilderState>();
+  final _sizeAnimKey = GlobalKey<AnimationBuilderState>();
   AnimationBuilderStateMixin? get sizeAnim => _sizeAnimKey.currentState as AnimationBuilderStateMixin?;
-  final _fadeAnimKey = new GlobalKey<AnimationBuilderState>();
+  final _fadeAnimKey = GlobalKey<AnimationBuilderState>();
   AnimationBuilderStateMixin? get fadeAnim => _fadeAnimKey.currentState as AnimationBuilderStateMixin?;
-  Map<String, dynamic> _attachedControllers = Map();
+  Map<String, dynamic> _attachedControllers = <String, dynamic>{};
 
   dynamic _attachController(FormGroup formGroup, String controlName, controllerBuilder) {
     if (_attachedControllers.containsKey(controlName)) {
