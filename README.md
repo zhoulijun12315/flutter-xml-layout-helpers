@@ -49,6 +49,11 @@ and exports every class: `PipeProvider`, `Pipe`, `FormControl`, `FormGroup`,
 Implementation files live under `lib/src/` and are not part of the public API,
 so IDEs only ever suggest `headers.dart` — no scattered deep imports.
 
+> **Behavior note:** the internal value streams do not replay the latest value
+> to new listeners (unlike rxdart's `BehaviorSubject`). Generated code passes
+> the current value as `initialData`; hand-written listeners should read the
+> `.value` getter first or expect only future events.
+
 Migrating old scattered imports in one shot:
 
 ```sh

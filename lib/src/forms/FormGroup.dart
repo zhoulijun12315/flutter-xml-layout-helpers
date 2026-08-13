@@ -153,7 +153,10 @@ class FormGroup {
         'the formGroup: formGroup.addControl(FormControl<Type>(\'$name\', \'\'))',
       );
     }
-    return control as FormControl<T>;
+    // Cast via dynamic: a runtime `as FormControl<T>` would throw for any
+    // non-dynamic T (FormControl<dynamic> is not a subtype of
+    // FormControl<String>). The value type is unchanged, so this is safe.
+    return control as dynamic;
   }
 
   void setValue(Map<String, Object?> value) {
@@ -195,6 +198,10 @@ class FormGroup {
   }
 
   void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
     _controlsStatusSubscription?.cancel();
     _controlsStatusSubscription = null;
     _submitEnabledSubscription?.cancel();
@@ -207,4 +214,6 @@ class FormGroup {
       control.dispose();
     }
   }
+
+  bool _disposed = false;
 }

@@ -26,5 +26,10 @@ Add submitEnabledStream.
   to `lib/src/` (removed the old `flutter_xml_layout_helpers.dart` main file).
 - `WidgetHelpers.ifTrue` accepts a nullable condition (`null` is treated as
   `false`), matching pre-null-safety behavior for optional `bool` params.
+- Fixed `FormGroup.get<T>` runtime cast crash for typed lookups; made
+  `FormControl`/`FormGroup` dispose idempotent; a throwing future validator
+  now marks the control invalid instead of surfacing as an unhandled async
+  error; `AnimationBuilder` tracks disposal with a real flag instead of a
+  broken `toString()` check; pubspec homepage now points at the actual repo.
 
 ## [0.0.6] - 3-7-2020.

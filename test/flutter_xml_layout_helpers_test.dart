@@ -119,6 +119,25 @@ void main() {
 
       control.dispose();
     });
+
+    test('dispose is idempotent', () {
+      final control = FormControl<String>('name', 'value');
+      control.dispose();
+      control.dispose();
+    });
+
+    test('a throwing future validator marks the control invalid', () async {
+      final control = FormControl<String>('name', 'value', futureValidators: [
+        FutureValidator((value) async {
+          throw Exception('boom');
+        }),
+      ]);
+
+      await control.validate();
+
+      expect(control.invalid, isTrue);
+      expect(control.firstError, contains('boom'));
+    });
   });
 
   group('FormGroup', () {
@@ -207,6 +226,22 @@ void main() {
     test('get throws for unknown controls', () {
       final group = FormGroup();
       expect(() => group.get('missing'), throwsException);
+    });
+
+    test('get with an explicit type argument does not crash', () {
+      final group = FormGroup();
+      group.add(FormControl<String>('name', 'value'));
+
+      final control = group.get<String>('name');
+      expect(control.value, 'value');
+    });
+
+    test('dispose is idempotent', () {
+      final group = FormGroup();
+      group.add(FormControl<String>('name', 'value'));
+
+      group.dispose();
+      group.dispose();
     });
   });
 

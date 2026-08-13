@@ -88,19 +88,25 @@ class FormControl<T> {
     if (errors.isNotEmpty) {
       _statusStream.add(ControlStatus.invalid);
     } else if (_futureValidators.isNotEmpty) {
-      final futures = <Future<String?>>[
-        for (final validator in _futureValidators) validator.validate(_value),
-      ];
-      final results = await Future.wait(futures);
-      final futureErrors = <String>[
-        for (final error in results)
-          if (error != null && error.isNotEmpty) error,
-      ];
-      _errorsStream.add(futureErrors);
-      if (futureErrors.isNotEmpty) {
+      try {
+        final futures = <Future<String?>>[
+          for (final validator in _futureValidators) validator.validate(_value),
+        ];
+        final results = await Future.wait(futures);
+        final futureErrors = <String>[
+          for (final error in results)
+            if (error != null && error.isNotEmpty) error,
+        ];
+        _errorsStream.add(futureErrors);
+        if (futureErrors.isNotEmpty) {
+          _statusStream.add(ControlStatus.invalid);
+        } else {
+          _statusStream.add(ControlStatus.valid);
+        }
+      } catch (e) {
+        // A throwing validator must not surface as an unhandled async error.
+        _errorsStream.add(<String>['validation error: $e']);
         _statusStream.add(ControlStatus.invalid);
-      } else {
-        _statusStream.add(ControlStatus.valid);
       }
     } else {
       _statusStream.add(ControlStatus.valid);
@@ -170,6 +176,10 @@ class FormControl<T> {
   }
 
   void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
     _attachedController?.removeListener(_controllerValueChanged);
     _attachedController?.clear();
     _attachedController?.dispose();
@@ -179,4 +189,6 @@ class FormControl<T> {
     _statusStream.close();
     _errorsStream.close();
   }
+
+  bool _disposed = false;
 }

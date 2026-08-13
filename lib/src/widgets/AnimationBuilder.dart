@@ -118,8 +118,9 @@ class AnimationBuilderState extends State<AnimationBuilder>
   ValueChanged<AnimationStatus>? _repeatStatusListener;
   VoidCallback? _endAnimationListener;
 
-  bool get _controllerIsDisposed =>
-      _controller?.toString().toLowerCase().contains('disposed') ?? false;
+  bool _disposed = false;
+
+  bool get _controllerIsDisposed => _disposed;
 
   int? _cycles;
   int? _repeats;
@@ -198,6 +199,9 @@ class AnimationBuilderState extends State<AnimationBuilder>
     bool dispose = false,
     bool reset = false,
   }) {
+    if (_disposed) {
+      return;
+    }
     _initAnimation(
       repeats: repeats ?? _repeats,
       cycles: cycles ?? _cycles,
@@ -323,6 +327,7 @@ class AnimationBuilderState extends State<AnimationBuilder>
 
   @override
   void dispose() {
+    _disposed = true;
     final listener = _listener;
     if (listener != null) {
       _animation?.removeListener(listener);
