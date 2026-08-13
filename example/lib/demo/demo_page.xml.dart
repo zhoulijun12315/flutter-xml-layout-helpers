@@ -1272,14 +1272,14 @@ class DemoControllerBase {
   bool _loaded = false;
   final formGroup = FormGroup();
   final _colorAnimKey = GlobalKey<AnimationBuilderState>();
-  AnimationBuilderStateMixin? get colorAnim =>
-      _colorAnimKey.currentState as AnimationBuilderStateMixin?;
+  AnimationBuilderStateMixin get colorAnim =>
+      _colorAnimKey.currentState as AnimationBuilderStateMixin;
   final _sizeAnimKey = GlobalKey<AnimationBuilderState>();
-  AnimationBuilderStateMixin? get sizeAnim =>
-      _sizeAnimKey.currentState as AnimationBuilderStateMixin?;
+  AnimationBuilderStateMixin get sizeAnim =>
+      _sizeAnimKey.currentState as AnimationBuilderStateMixin;
   final _fadeAnimKey = GlobalKey<AnimationBuilderState>();
-  AnimationBuilderStateMixin? get fadeAnim =>
-      _fadeAnimKey.currentState as AnimationBuilderStateMixin?;
+  AnimationBuilderStateMixin get fadeAnim =>
+      _fadeAnimKey.currentState as AnimationBuilderStateMixin;
   Map<String, dynamic> _attachedControllers = <String, dynamic>{};
 
   dynamic _attachController(

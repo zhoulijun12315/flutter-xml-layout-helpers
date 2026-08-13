@@ -279,7 +279,7 @@ class DemoController extends DemoControllerBase {
   }
 
   void replayAnimation() {
-    fadeAnim?.triggerAnimation();
+    fadeAnim.triggerAnimation();
   }
 
   void setLooping(bool value) {
@@ -288,7 +288,7 @@ class DemoController extends DemoControllerBase {
   }
 
   void playSizeAnim() {
-    sizeAnim?.triggerAnimation(repeats: _looping ? 0 : 1);
+    sizeAnim.triggerAnimation(repeats: _looping ? 0 : 1);
   }
 
   void addItem() {
