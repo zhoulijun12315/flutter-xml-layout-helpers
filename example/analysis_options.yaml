@@ -1,0 +1,6 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - lib/demo/demo_page.xml.dart
+    - lib/i18n/gen/**

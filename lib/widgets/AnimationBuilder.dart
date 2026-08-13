@@ -1,123 +1,93 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-// class AnimationControllerAccessor {
-//   BehaviorSubject _subject = BehaviorSubject();
-//   bool _initialized = false;
-
-//   Future<AnimationController> getAnimationController() async {
-//     AnimationController controller;
-//     _subject.take(1).listen((data) => controller = data);
-//     final streamQueue = new StreamQueue(_subject);
-//     await Future.wait([streamQueue.next]);
-//     return controller;
-//   }
-// }
-
-// original source: https://github.com/GIfatahTH/animator/blob/master/lib/animator.dart
-
+/// Animates widgets declared in XML layouts.
+///
+/// Adapted from https://github.com/GIfatahTH/animator (see the original source
+/// for the design; this version is null-safe and no longer depends on rxdart).
 class AnimationBuilder extends StatefulWidget {
-  AnimationBuilder(
-      {Key key,
-      this.controller,
-      this.animation,
-      this.child,
-      this.tween,
-      this.duration,
-      this.curve: Curves.linear,
-      this.cycles,
-      this.repeats,
-      this.builder,
-      this.builderMap,
-      this.tweenMap,
-      this.name,
-      this.autoTrigger,
-      this.customListener,
-      this.endAnimationListener,
-      this.statusListener})
-      : assert(() {
-          if (builder == null && builderMap == null) {
-            throw FlutterError(
-                'You have to define one of the "builder" or "builderMap" argument\n'
-                ' - Define the "builder" argument if you have one Tween\n'
-                ' - Define the "builderMap" argument if you have many Tweens');
-          }
-          if (builder != null && builderMap != null) {
-            throw FlutterError(
-                'You have to define either builder or "builderMap" argument. you can\'t define both\n'
-                ' - Define the "builder" argument if you have one Tween\n'
-                ' - Define the "builderMap" argument if you have many Tweens');
-          }
-          if (builderMap != null && tweenMap == null) {
-            throw FlutterError(
-                '"tweenMap" must not be null. If you have one tween use "builder" argument instead');
-          }
-          return true;
-        }()),
-        super(
-          key: key ?? UniqueKey(),
-        );
+  AnimationBuilder({
+    Key? key,
+    this.controller,
+    this.animation,
+    this.child,
+    this.tween,
+    this.duration,
+    this.curve = Curves.linear,
+    this.cycles,
+    this.repeats,
+    this.builder,
+    this.builderMap,
+    this.tweenMap,
+    this.name,
+    this.autoTrigger,
+    this.customListener,
+    this.endAnimationListener,
+    this.statusListener,
+  })  : assert(
+          builder != null || builderMap != null,
+          'You have to define one of the "builder" or "builderMap" argument',
+        ),
+        assert(
+          builder == null || builderMap == null,
+          'You have to define either builder or "builderMap" argument. '
+          "you can't define both",
+        ),
+        assert(
+          builderMap == null || tweenMap != null,
+          '"tweenMap" must not be null. If you have one tween use '
+          '"builder" argument instead',
+        ),
+        super(key: key ?? UniqueKey());
 
-  final Widget child;
+  final Widget? child;
 
-  final AnimationController controller;
-  final Animation<double> animation;
+  final AnimationController? controller;
+  final Animation<double>? animation;
 
-  ///A linear interpolation between a beginning and ending value.
+  /// A linear interpolation between a beginning and ending value.
   ///
-  ///`tween` argument is used for one Tween animation.
-  final Tween tween;
+  /// `tween` is used for a single [Animation<double>] animation.
+  final Tween<double>? tween;
 
-  ///A span of time, such as 27 days, 4 hours, 12 minutes, and 3 seconds
-  final Duration duration;
+  /// The duration of the animation.
+  final Duration? duration;
 
-  ///An easing curve, i.e. a mapping of the unit interval to the unit interval.
+  /// An easing curve, i.e. a mapping of the unit interval to the unit
+  /// interval.
   final Curve curve;
 
-  ///The number of forward and backward periods the animation performs before stopping
-  final int cycles;
+  /// The number of forward and backward periods the animation performs before
+  /// stopping.
+  final int? cycles;
 
-  ///The number of forward periods the animation performs before stopping
-  final int repeats;
+  /// The number of forward periods the animation performs before stopping.
+  final int? repeats;
 
-  ///Whether to start the animation when the AnimationBuilder widget
-  ///is inserted into the tree.
-  final bool autoTrigger;
+  /// Whether to start the animation when the [AnimationBuilder] widget is
+  /// inserted into the tree.
+  final bool? autoTrigger;
 
-  ///Function to be called every time the animation value changes.
-  ///
-  ///The customListener is provided with an [Animation] object.
-  final Function customListener;
+  /// Called every time the animation value changes.
+  final VoidCallback? customListener;
 
-  ///VoidCallback to be called when animation is finished.
-  final Function endAnimationListener;
+  /// Called when the animation finishes.
+  final VoidCallback? endAnimationListener;
 
-  ///Function to be called every time the status of the animation changes.
-  ///
-  ///The customListener is provided with an [AnimationStatus, AnimationSetup] object.
-  final Function(AnimationStatus) statusListener;
+  /// Called every time the status of the animation changes.
+  final ValueChanged<AnimationStatus>? statusListener;
 
-  ///The build strategy currently used for one Tween. AnimationBuilder widget rebuilds
-  ///itself every time the animation changes value.
-  ///
-  ///The builder is provided with an [Animation] object.
-  final Widget Function(Animation, Widget child) builder;
+  /// Builds the widget for a single-tween animation.
+  final Widget Function(Animation<double>, Widget?)? builder;
 
-  ///The build strategy currently used for multi-Tween. AnimationBuilder widget rebuilds
-  ///itself every time the animation changes value.
-  ///
-  ///The `builderMap` is provided with an `Map<String, Animation>` object.
-  final Widget Function(Map<String, Animation>, Widget child) builderMap;
+  /// Builds the widget for a multi-tween animation.
+  final Widget Function(Map<String, Animation<dynamic>>, Widget?)? builderMap;
 
-  ///A linear interpolation between a beginning and ending value.
-  ///
-  ///`tweenMap` argument is used for multi-Tween animation.
-  final Map<String, Tween<dynamic>> tweenMap;
+  /// A map of tweens used with [builderMap].
+  final Map<String, Tween<dynamic>>? tweenMap;
 
-  ///The name of your AnimationBuilder widget.
-  ///Many widgets can have the same name.
-  ///
-  ///It is used to rebuild this widget from your logic classes
+  /// The name of this [AnimationBuilder] widget. Many widgets can share the
+  /// same name; it is used to trigger the animation from logic classes.
   final dynamic name;
 
   @override
@@ -125,87 +95,117 @@ class AnimationBuilder extends StatefulWidget {
 }
 
 class AnimationBuilderStateMixin {
-  AnimationController get controller => null;
-  triggerAnimation(
-      {int cycles, int repeats, bool dispose = false, bool reset = false}) {}
+  AnimationController? get controller => null;
+
+  void triggerAnimation({
+    int? cycles,
+    int? repeats,
+    bool dispose = false,
+    bool reset = false,
+  }) {}
 }
 
 class AnimationBuilderState extends State<AnimationBuilder>
     with TickerProviderStateMixin, AnimationBuilderStateMixin {
-  AnimationController _controller;
-  AnimationController get controller => _controller;
-  Animation _animation;
-  // Map of animation, keys are the same as key of tweenMap
-  Map<String, Animation> _animationMap = {};
-  Tween _tween;
+  AnimationController? _controller;
+  Animation<double>? _animation;
+  Map<String, Animation<dynamic>> _animationMap =
+      <String, Animation<dynamic>>{};
+  late Tween<dynamic> _tween;
 
-  VoidCallback _listener;
-  Function(AnimationStatus) _statusListener;
-  Function(AnimationStatus) _repeatStatusListener;
-  Function() _endAnimationListener;
+  VoidCallback? _listener;
+  ValueChanged<AnimationStatus>? _statusListener;
+  ValueChanged<AnimationStatus>? _repeatStatusListener;
+  VoidCallback? _endAnimationListener;
 
-  bool get _controllerIsDisposed => '$controller'.contains("DISPOSED");
+  bool get _controllerIsDisposed =>
+      _controller?.toString().toLowerCase().contains('disposed') ?? false;
 
-  int _cycles;
-  int _repeats;
+  int? _cycles;
+  int? _repeats;
+
+  @override
+  AnimationController? get controller => _controller;
 
   @override
   void initState() {
     _tween = widget.tween ?? Tween<double>(begin: 0, end: 1);
+    _listener = widget.customListener;
+    _statusListener = widget.statusListener;
+    _endAnimationListener = widget.endAnimationListener;
     _initAnimation(
-        dispose: false,
-        trigger: widget.autoTrigger,
-        cycles: widget.cycles,
-        repeats: widget.repeats);
+      dispose: false,
+      trigger: widget.autoTrigger ?? false,
+      cycles: widget.cycles,
+      repeats: widget.repeats,
+    );
     super.initState();
   }
 
-  _initAnimation(
-      {bool trigger = false, int cycles, int repeats, bool dispose = false}) {
-    if (controller == null || _controllerIsDisposed) {
-      _controller = widget.controller ?? AnimationController(duration: widget.duration, vsync: this);
+  void _initAnimation({
+    bool trigger = false,
+    int? cycles,
+    int? repeats,
+    bool dispose = false,
+  }) {
+    if (_controller == null || _controllerIsDisposed) {
+      _controller = widget.controller ??
+          AnimationController(duration: widget.duration, vsync: this);
     }
-    _animation = _tween
-        .animate(widget.animation ?? CurvedAnimation(parent: controller, curve: widget.curve));
 
-    if (widget.tweenMap != null) {
-      _animationMap = {};
-      widget.tweenMap?.forEach((k, v) {
-        final anim = widget.animation ?? CurvedAnimation(parent: controller, curve: widget.curve);
-        _animationMap[k] = v.animate(anim);
+    final controller = _controller!;
+    _animation = _tween.animate(
+      widget.animation ??
+          CurvedAnimation(parent: controller, curve: widget.curve),
+    ) as Animation<double>;
+
+    final tweenMap = widget.tweenMap;
+    if (tweenMap != null) {
+      _animationMap = <String, Animation<dynamic>>{};
+      tweenMap.forEach((key, tween) {
+        final parent = widget.animation ??
+            CurvedAnimation(parent: controller, curve: widget.curve);
+        _animationMap[key] = tween.animate(parent);
       });
     }
 
+    final animation = _animation!;
     if (_listener != null) {
-      _animation.addListener(_listener);
+      animation.addListener(_listener!);
     }
-
     if (_statusListener != null) {
-      _animation.addStatusListener(_statusListener);
+      animation.addStatusListener(_statusListener!);
     }
 
     if (cycles != null) {
       _cycles = cycles;
       _addCycleStatusListener(cycles, dispose, _endAnimationListener);
     } else {
-      _repeats = repeats ?? 1;
-      _addRepeatStatusListener(_repeats, dispose, _endAnimationListener);
+      final repeatCount = repeats ?? 1;
+      _repeats = repeatCount;
+      _addRepeatStatusListener(repeatCount, dispose, _endAnimationListener);
     }
 
-    if (trigger == true) {
+    if (trigger) {
       controller.forward();
     }
   }
 
   /// Starts running this animation forwards (towards the end).
-  triggerAnimation(
-      {int cycles, int repeats, bool dispose = false, bool reset = false}) {
+  void triggerAnimation({
+    int? cycles,
+    int? repeats,
+    bool dispose = false,
+    bool reset = false,
+  }) {
     _initAnimation(
-        repeats: repeats ?? _repeats,
-        cycles: cycles ?? _cycles,
-        dispose: dispose);
+      repeats: repeats ?? _repeats,
+      cycles: cycles ?? _cycles,
+      dispose: dispose,
+    );
 
-    if (reset && (cycles == null && _cycles == null)) {
+    final controller = _controller!;
+    if (reset && cycles == null && _cycles == null) {
       controller.reset();
     }
 
@@ -219,9 +219,16 @@ class AnimationBuilderState extends State<AnimationBuilder>
     }
   }
 
-  _addCycleStatusListener(
-      int cycles, bool dispose, Function endAnimationListener) {
-    _animation.removeStatusListener(_repeatStatusListener);
+  void _addCycleStatusListener(
+    int cycles,
+    bool dispose,
+    VoidCallback? endAnimationListener,
+  ) {
+    final animation = _animation!;
+    final controller = _controller!;
+    if (_repeatStatusListener != null) {
+      animation.removeStatusListener(_repeatStatusListener!);
+    }
     if (cycles == 0) {
       _repeatStatusListener = (AnimationStatus status) {
         if (status == AnimationStatus.completed) {
@@ -232,47 +239,62 @@ class AnimationBuilderState extends State<AnimationBuilder>
         }
       };
     } else {
-      _repeatStatusListener = (AnimationStatus status) {
+      late final ValueChanged<AnimationStatus> repeatStatusListener;
+      repeatStatusListener = (AnimationStatus status) {
         if (status == AnimationStatus.completed) {
           cycles--;
           if (cycles <= 0) {
-            _animation.removeStatusListener(_repeatStatusListener);
-            if (dispose) _disposeAnimation();
-            if (endAnimationListener != null) endAnimationListener();
+            animation.removeStatusListener(repeatStatusListener);
+            if (dispose) {
+              _disposeAnimation();
+            }
+            endAnimationListener?.call();
             return;
-          } else {
-            controller.reverse();
           }
-        }
-        if (status == AnimationStatus.dismissed) {
+          controller.reverse();
+        } else if (status == AnimationStatus.dismissed) {
           cycles--;
           if (cycles <= 0) {
-            _animation.removeStatusListener(_repeatStatusListener);
-            if (dispose) _disposeAnimation();
-            if (endAnimationListener != null) endAnimationListener();
+            animation.removeStatusListener(repeatStatusListener);
+            if (dispose) {
+              _disposeAnimation();
+            }
+            endAnimationListener?.call();
             return;
-          } else {
-            controller.forward();
           }
+          controller.forward();
         }
       };
+      _repeatStatusListener = repeatStatusListener;
     }
-    _animation.addStatusListener(_repeatStatusListener);
+    animation.addStatusListener(_repeatStatusListener!);
   }
 
-  /// Remove listener, statusListener and dispose the animation controller
-  _disposeAnimation() {
-    _animation.removeListener(_listener);
-    _animation.removeStatusListener(_statusListener);
-
+  /// Removes listeners and disposes the animation controller.
+  void _disposeAnimation() {
+    final listener = _listener;
+    if (listener != null) {
+      _animation?.removeListener(listener);
+    }
+    final statusListener = _statusListener;
+    if (statusListener != null) {
+      _animation?.removeStatusListener(statusListener);
+    }
     if (!_controllerIsDisposed) {
-      controller?.dispose();
+      _controller?.dispose();
     }
   }
 
-  _addRepeatStatusListener(
-      int repeats, bool dispose, Function endAnimationListener) {
-    _animation.removeStatusListener(_repeatStatusListener);
+  void _addRepeatStatusListener(
+    int repeats,
+    bool dispose,
+    VoidCallback? endAnimationListener,
+  ) {
+    final animation = _animation!;
+    final controller = _controller!;
+    if (_repeatStatusListener != null) {
+      animation.removeStatusListener(_repeatStatusListener!);
+    }
     if (repeats == 0) {
       _repeatStatusListener = (AnimationStatus status) {
         if (status == AnimationStatus.completed) {
@@ -281,46 +303,49 @@ class AnimationBuilderState extends State<AnimationBuilder>
         }
       };
     } else {
-      _repeatStatusListener = (AnimationStatus status) {
+      late final ValueChanged<AnimationStatus> repeatStatusListener;
+      repeatStatusListener = (AnimationStatus status) {
         if (status == AnimationStatus.completed) {
           repeats--;
           if (repeats <= 0) {
-            _animation.removeStatusListener(_repeatStatusListener);
-            // if (dispose) disposeAnimation();
-
-            if (endAnimationListener != null) {
-              endAnimationListener();
-            }
+            animation.removeStatusListener(repeatStatusListener);
+            endAnimationListener?.call();
             return;
-          } else {
-            controller.reset();
-            controller.forward();
           }
+          controller.reset();
+          controller.forward();
         }
       };
+      _repeatStatusListener = repeatStatusListener;
     }
-    _animation.addStatusListener(_repeatStatusListener);
+    animation.addStatusListener(_repeatStatusListener!);
   }
 
   @override
   void dispose() {
-    _animation.removeListener(_listener);
-    _animation.removeStatusListener(_statusListener);
-    controller.dispose();
+    final listener = _listener;
+    if (listener != null) {
+      _animation?.removeListener(listener);
+    }
+    final statusListener = _statusListener;
+    if (statusListener != null) {
+      _animation?.removeStatusListener(statusListener);
+    }
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _animation,
+      animation: _animation!,
       child: widget.child,
       builder: (context, child) {
-        if (widget.builder != null) {
-          return widget.builder(_animation, child);
-        } else {
-          return widget.builderMap(_animationMap, child);
+        final builder = widget.builder;
+        if (builder != null) {
+          return builder(_animation!, child);
         }
+        return widget.builderMap!(_animationMap, child);
       },
     );
   }

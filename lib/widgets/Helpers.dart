@@ -1,128 +1,182 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 class WidgetHelpers {
   static List<T> mapToWidgetList<T extends Widget, D>(
-      Iterable<dynamic> items, T Function(D item, int index) map) {
-    List<T> result = [];
-    for (var index = 0; index < items.length; index++) {
-      result.add(map(items.elementAt(index), index));
+    Iterable<dynamic> items,
+    T Function(D item, int index) map,
+  ) {
+    final result = <T>[];
+    var index = 0;
+    for (final item in items) {
+      result.add(map(item as D, index));
+      index++;
     }
     return result;
   }
 
-  static Widget ifTrue(bool condition, Widget Function() trueWidget,
-      Widget Function() falseWidget) {
-    if (condition != null && condition) {
+  static Widget ifTrue(
+    bool condition,
+    Widget Function() trueWidget,
+    [Widget Function()? falseWidget]
+  ) {
+    if (condition) {
       return trueWidget();
     }
-    return falseWidget();
+    return falseWidget != null ? falseWidget() : const SizedBox.shrink();
   }
 
   static Widget ifElseChain(
-      Iterable<SwitchCase> ifElseChains, Widget Function() elseBuilder) {
-    final trueItem = ifElseChains.firstWhere(
-        (a) => a.value != null && a.value == true,
-        orElse: () => null);
-    return trueItem != null
-        ? trueItem.builder()
-        : (elseBuilder != null
-            ? elseBuilder()
-            : null // Container(height: 0, width: 0)
-            );
+    Iterable<SwitchCase> ifElseChains,
+    Widget? Function()? elseBuilder,
+  ) {
+    final trueItem = _firstTrue(ifElseChains);
+    if (trueItem != null) {
+      return trueItem.builder() ?? const SizedBox.shrink();
+    }
+
+    if (elseBuilder != null) {
+      return elseBuilder() ?? const SizedBox.shrink();
+    }
+    return const SizedBox.shrink();
   }
 
   static List<Widget> ifElseChainMultiChild(
-      Iterable<SwitchCaseMultiChild> ifElseChains,
-      Iterable<Widget> Function() elseBuilder) {
-    final trueItem = ifElseChains.firstWhere(
-        (a) => a.value != null && a.value == true,
-        orElse: () => null);
-    return trueItem != null
-        ? trueItem.builder()
-        : (elseBuilder != null
-            ? elseBuilder()
-            : [/*Container(height: 0, width: 0)*/]);
+    Iterable<SwitchCaseMultiChild> ifElseChains,
+    List<Widget>? Function()? elseBuilder,
+  ) {
+    final trueItem = _firstTrueMultiChild(ifElseChains);
+    if (trueItem != null) {
+      return trueItem.builder() ?? const <Widget>[];
+    }
+
+    if (elseBuilder != null) {
+      return elseBuilder() ?? const <Widget>[];
+    }
+    return const <Widget>[];
   }
 
-  static Widget switchValue(dynamic value,
-      Widget Function() defaultWidgetBuilder, Iterable<SwitchCase> cases) {
-    final res = cases.firstWhere((a) => a.value == value, orElse: () => null);
-    return res != null ? res.builder() : defaultWidgetBuilder;
+  static SwitchCase? _firstTrue(Iterable<SwitchCase> cases) {
+    for (final item in cases) {
+      if (item.value == true) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  static SwitchCaseMultiChild? _firstTrueMultiChild(
+    Iterable<SwitchCaseMultiChild> cases,
+  ) {
+    for (final item in cases) {
+      if (item.value == true) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  static Widget switchValue(
+    dynamic value,
+    Widget Function()? defaultWidgetBuilder,
+    Iterable<SwitchCase> cases,
+  ) {
+    SwitchCase? result;
+    for (final item in cases) {
+      if (item.value == value) {
+        result = item;
+        break;
+      }
+    }
+
+    if (result != null) {
+      return result.builder() ??
+          (defaultWidgetBuilder != null
+              ? defaultWidgetBuilder()
+              : const SizedBox.shrink());
+    }
+    return defaultWidgetBuilder != null
+        ? defaultWidgetBuilder()
+        : const SizedBox.shrink();
   }
 
   static Widget when(String value, Widget widget, Widget defaultWidget) {
     final segments = value.split(':');
-    final platform = segments.length > 0 ? segments[0] : value;
-    final version = segments.length > 1 ? segments[1] : '';
-    final platformResult = platform == 'android' && Platform.isAndroid ||
-        platform == 'ios' && Platform.isIOS ||
-        platform == 'windows' && Platform.isWindows ||
-        platform == 'mac' && Platform.isMacOS ||
-        platform == 'linux' && Platform.isLinux;
-
-    if (platformResult &&
-        (version == null || version.isEmpty || version == Platform.version)) {
-      return widget;
-    }
-    return defaultWidget;
+    final platform = segments.isNotEmpty ? segments.first : value;
+    return _platformMatches(platform) ? widget : defaultWidget;
   }
 
-  static dynamic onPlatformProperty(
-      {dynamic Function() ios,
-      dynamic Function() android,
-      dynamic Function() windows,
-      dynamic Function() mac,
-      dynamic Function() linux}) {
-    if (Platform.isAndroid) {
-      return android();
-    } else if (Platform.isIOS) {
-      return ios();
-    } else if (Platform.isAndroid) {
-      return android();
-    } else if (Platform.isWindows) {
-      return windows();
-    } else if (Platform.isMacOS) {
-      return mac();
-    } else if (Platform.isLinux) {
-      return linux();
+  static bool _platformMatches(String platform) {
+    if (kIsWeb) {
+      return platform == 'web';
     }
-
-    return null;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return platform == 'android';
+      case TargetPlatform.iOS:
+        return platform == 'ios';
+      case TargetPlatform.macOS:
+        return platform == 'mac' || platform == 'macos';
+      case TargetPlatform.windows:
+        return platform == 'windows';
+      case TargetPlatform.linux:
+        return platform == 'linux';
+      case TargetPlatform.fuchsia:
+        return platform == 'fuchsia';
+    }
   }
 
-  static Widget onPlatformWidget(
-      {Widget Function() ios,
-      Widget Function() android,
-      Widget Function() windows,
-      Widget Function() mac,
-      Widget Function() linux}) {
-    if (Platform.isAndroid) {
-      return android();
-    } else if (Platform.isIOS) {
-      return ios();
-    } else if (Platform.isAndroid) {
-      return android();
-    } else if (Platform.isWindows) {
-      return windows();
-    } else if (Platform.isMacOS) {
-      return mac();
-    } else if (Platform.isLinux) {
-      return linux();
+  static dynamic onPlatformProperty({
+    dynamic Function()? ios,
+    dynamic Function()? android,
+    dynamic Function()? windows,
+    dynamic Function()? mac,
+    dynamic Function()? linux,
+  }) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        return ios?.call();
+      case TargetPlatform.android:
+        return android?.call();
+      case TargetPlatform.windows:
+        return windows?.call();
+      case TargetPlatform.macOS:
+        return mac?.call();
+      case TargetPlatform.linux:
+        return linux?.call();
+      case TargetPlatform.fuchsia:
+        return null;
     }
+  }
 
-    return Container(width: 0, height: 0);
+  static Widget onPlatformWidget({
+    Widget Function()? ios,
+    Widget Function()? android,
+    Widget Function()? windows,
+    Widget Function()? mac,
+    Widget Function()? linux,
+  }) {
+    final result = onPlatformProperty(
+      ios: ios,
+      android: android,
+      windows: windows,
+      mac: mac,
+      linux: linux,
+    );
+    return result is Widget ? result : const SizedBox.shrink();
   }
 }
 
 class SwitchCase {
   SwitchCase(this.value, this.builder);
-  dynamic value;
-  Widget Function() builder;
+
+  final dynamic value;
+  final Widget? Function() builder;
 }
 
 class SwitchCaseMultiChild {
   SwitchCaseMultiChild(this.value, this.builder);
-  dynamic value;
-  List<Widget> Function() builder;
+
+  final dynamic value;
+  final List<Widget>? Function() builder;
 }

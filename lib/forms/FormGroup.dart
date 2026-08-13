@@ -1,51 +1,50 @@
 import 'dart:async';
-import 'package:rxdart/rxdart.dart';
 
+import '../src/value_stream.dart';
 import 'FormControl.dart';
 import 'Validator.dart';
 
-
 class FormGroup {
-  Map<String, FormControl> _controls = new Map<String, FormControl>();
-  Future Function(dynamic data) _submitCallback;
-  // Stream<bool> get dirtyStream => _dirty.stream;
-  StreamSubscription _submitEnabledSubscription;
-  StreamSubscription _controlsStatusSubscription;
-  final _statusStream = BehaviorSubject<ControlStatus>.seeded(ControlStatus.valid);
-  Validator _validator;
-  // FutureValidator _futureValidator;
+  FormGroup();
 
-  Stream<ControlStatus> get statusStream => _statusStream;
+  final Map<String, FormControl<dynamic>> _controls =
+      <String, FormControl<dynamic>>{};
+  Future<void> Function(dynamic data)? _submitCallback;
+  StreamSubscription<dynamic>? _submitEnabledSubscription;
+  StreamSubscription<ControlStatus>? _controlsStatusSubscription;
+  Validator? _validator;
+
+  final ValueStream<ControlStatus> _statusStream = ValueStream<ControlStatus>(
+    ControlStatus.valid,
+  );
+  Stream<ControlStatus> get statusStream => _statusStream.stream;
   ControlStatus get status => _statusStream.value;
   bool get valid => _statusStream.value == ControlStatus.valid;
   bool get invalid => _statusStream.value == ControlStatus.invalid;
   bool get pending => _statusStream.value == ControlStatus.pending;
 
-  final _errorStream = BehaviorSubject<String>.seeded('');
-  Stream<String> get error => _errorStream;
+  final ValueStream<String> _errorStream = ValueStream<String>('');
+  Stream<String> get error => _errorStream.stream;
   String getError() => _errorStream.value;
 
-  final _submitting = BehaviorSubject<bool>.seeded(false);
-  Stream<bool> get submittingStream => _submitting;
+  final ValueStream<bool> _submitting = ValueStream<bool>(false);
+  Stream<bool> get submittingStream => _submitting.stream;
   bool get submitting => _submitting.value;
 
-  final _submitEnabledStream = BehaviorSubject<bool>.seeded(false);
-  Stream<bool> get submitEnabledStream => _submitEnabledStream;
+  final ValueStream<bool> _submitEnabledStream = ValueStream<bool>(false);
+  Stream<bool> get submitEnabledStream => _submitEnabledStream.stream;
   bool get submitEnabled => _submitEnabledStream.value;
 
-  FormGroup();
-
-
-  void add(FormControl control) {
-    _controls.addEntries([new MapEntry<String, FormControl>(control.name, control)]);
+  void add(FormControl<dynamic> control) {
+    _controls[control.name] = control;
     _initStatusStream();
     validate();
   }
 
-  void addAll(List<FormControl> controls) {
-    controls.forEach((control) {
-      _controls.addEntries([new MapEntry<String, FormControl>(control.name, control)]);
-    });
+  void addAll(List<FormControl<dynamic>> controls) {
+    for (final control in controls) {
+      _controls[control.name] = control;
+    }
     _initStatusStream();
     validate();
   }
@@ -60,169 +59,152 @@ class FormGroup {
   }
 
   void removeAll(List<String> keys) {
-    bool hasControls = false;
-    keys.forEach((key) {
+    var hasControls = false;
+    for (final key in keys) {
       final control = _controls.remove(key);
       if (control != null) {
         hasControls = true;
         control.dispose();
       }
-    });
+    }
     if (hasControls) {
       _initStatusStream();
       validate();
     }
   }
-  
+
   void _initStatusStream() {
-    final streams = _controls.map((n, c) => MapEntry(n, c.statusStream)).values.toList();
-    if (_controlsStatusSubscription != null) {
-      _controlsStatusSubscription.cancel();
-      _controlsStatusSubscription = null;
-    }
-    _controlsStatusSubscription = Observable
-      .merge(streams)
-      .listen((value) {
-        final old = _statusStream.value;
-        if (value != old) {
-          final hasInvalid = _controls.values.where((c) => c.invalid).length > 0;
-          if (hasInvalid) {
-            _statusStream.add(ControlStatus.invalid);
-            _runValidator();
-            return;
-          }
+    _controlsStatusSubscription?.cancel();
+    _controlsStatusSubscription = mergeStreams<ControlStatus>(
+      _controls.values.map((control) => control.statusStream).toList(),
+    ).listen((_) => _updateStatusFromControls());
 
-          final hasPending = _controls.values.where((c) => c.pending).length > 0;
-          if (hasPending) {
-            _statusStream.add(ControlStatus.pending);
-          }
-          else {
-            _runValidator();
-            _setStatus();
-          }
-        }
-      });
+    _submitEnabledSubscription?.cancel();
+    _submitEnabledSubscription = mergeStreams<Object?>(<Stream<Object?>>[
+      _statusStream.stream,
+      _submitting.stream,
+    ]).listen((_) => _updateSubmitEnabled());
 
-    if (_submitEnabledSubscription != null) {
-      _submitEnabledSubscription.cancel();
-      _submitEnabledSubscription = null;
+    // Recompute immediately so the group state reflects the current controls.
+    // This mirrors the replay semantics the original code got from rxdart's
+    // BehaviorSubject.
+    _updateStatusFromControls();
+    _updateSubmitEnabled();
+  }
+
+  void _updateStatusFromControls() {
+    final hasInvalid = _controls.values.any((control) => control.invalid);
+    if (hasInvalid) {
+      _statusStream.add(ControlStatus.invalid);
+      return;
     }
-    _submitEnabledSubscription = Observable.merge([_statusStream, _submitting]).listen((data) {
-      final newValue = status == ControlStatus.valid && !submitting;
-      if (_submitEnabledStream.value != newValue) {
-        _submitEnabledStream.value = newValue;
-      }
-    });
+
+    final hasPending = _controls.values.any((control) => control.pending);
+    if (hasPending) {
+      _statusStream.add(ControlStatus.pending);
+    } else {
+      _runValidator();
+      _setStatus();
+    }
+  }
+
+  void _updateSubmitEnabled() {
+    final newValue = status == ControlStatus.valid && !submitting;
+    if (_submitEnabledStream.value != newValue) {
+      _submitEnabledStream.value = newValue;
+    }
   }
 
   bool _hasError() {
-    return _errorStream.value != null && _errorStream.value.isNotEmpty;
+    return _errorStream.value.isNotEmpty;
   }
 
   void _runValidator() {
     final value = getValue();
     if (_validator != null) {
-      _errorStream.value = _validator.validate(value);
-    }
-    else if (_errorStream.value != null) {
-      _errorStream.value = null;
+      _errorStream.value = _validator!.validate(value) ?? '';
+    } else if (_errorStream.value.isNotEmpty) {
+      _errorStream.value = '';
     }
   }
 
   void _setStatus() {
     if (_hasError()) {
       _statusStream.add(ControlStatus.invalid);
-    }
-    else {
-      // todo: review
-      // if (_futureValidator != null) {
-      //   _statusStream.add(ControlStatus.pending);
-      //   _futureValidator.validate(value).then((error) {
-      //     if (error != null && error.isNotEmpty) {
-      //       _error = error;
-      //       _statusStream.add(ControlStatus.invalid);
-      //     }
-      //     else if (_statusStream.value != ControlStatus.invalid) {
-      //       _statusStream.add(ControlStatus.valid);
-      //     }
-      //   });
-      // }
-      // else {
-        _errorStream.value = '';
-        _statusStream.add(ControlStatus.valid);
-      // }
+    } else {
+      _errorStream.value = '';
+      _statusStream.add(ControlStatus.valid);
     }
   }
 
-  Future validate() async {
-    await Future.wait(_controls.map((n, c) => MapEntry(n, c.validate())).values);
+  Future<void> validate() async {
+    await Future.wait(_controls.values.map((control) => control.validate()));
   }
 
-  bool hasControl<T>(String name) {
+  bool hasControl(String name) {
     return _controls.containsKey(name);
   }
 
   FormControl<T> get<T>(String name) {
-    if (!_controls.containsKey(name)) {
-      throw Exception("FormControl with name: $name not found. don't forget to add it to the formGroup: formGroup.addControl(FormControl<Type>('$name', ''))");
+    final control = _controls[name];
+    if (control == null) {
+      throw Exception(
+        "FormControl with name: $name not found. don't forget to add it to "
+        'the formGroup: formGroup.addControl(FormControl<Type>(\'$name\', \'\'))',
+      );
     }
-    return _controls[name];
+    return control as FormControl<T>;
   }
 
-  void setValue(Map<String, Object> value) {
-    _controls.forEach((name, c) {
-      c.value = value[name];
+  void setValue(Map<String, Object?> value) {
+    _controls.forEach((name, control) {
+      control.value = value[name];
     });
   }
 
-  Map<String, Object> getValue() {
-    Map<String, Object> values = new Map<String, Object>();
-    _controls.forEach((name, c) {
-      values[name] = c.value;
+  Map<String, Object?> getValue() {
+    final values = <String, Object?>{};
+    _controls.forEach((name, control) {
+      values[name] = control.value;
     });
     return values;
   }
 
   void setValidator(Validator validator) {
-    this._validator = validator;
+    _validator = validator;
   }
 
-  // void setFutureValidator(FutureValidator validator) {
-  //   this._futureValidator = validator;
-  // }
-
-  void submit() async {
+  Future<void> submit() async {
     if (_submitCallback == null || _submitting.value) {
       return;
     }
+
     _submitting.value = true;
-    
-    await validate();
-    if (valid) {
-      await _submitCallback(getValue());
+    try {
+      await validate();
+      if (valid) {
+        await _submitCallback!(getValue());
+      }
+    } finally {
+      _submitting.value = false;
     }
-    
-    _submitting.value = false;
   }
 
-  void onSubmit(Future Function(dynamic data) submitCallback) {
+  void onSubmit(Future<void> Function(dynamic data) submitCallback) {
     _submitCallback = submitCallback;
   }
 
   void dispose() {
+    _controlsStatusSubscription?.cancel();
+    _controlsStatusSubscription = null;
+    _submitEnabledSubscription?.cancel();
+    _submitEnabledSubscription = null;
     _submitEnabledStream.close();
     _submitting.close();
     _errorStream.close();
-    if (_controlsStatusSubscription != null) {
-      _controlsStatusSubscription.cancel();
-      _controlsStatusSubscription = null;
+    _statusStream.close();
+    for (final control in _controls.values) {
+      control.dispose();
     }
-    if (_submitEnabledSubscription != null) {
-      _submitEnabledSubscription.cancel();
-      _submitEnabledSubscription = null;
-    }
-    _controls.forEach((name, c) {
-      c.dispose();
-    });
   }
 }

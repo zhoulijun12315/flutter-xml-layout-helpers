@@ -1,130 +1,108 @@
 import 'dart:async';
+
 import 'package:flutter/widgets.dart';
-import 'package:rxdart/rxdart.dart';
+
+import '../src/value_stream.dart';
 import 'Validator.dart';
 
-enum ControlStatus {
-  valid,
-  invalid,
-  pending,
-  disabled
-}
+enum ControlStatus { valid, invalid, pending, disabled }
 
 class FormControl<T> {
-  FormControl(String name, T value, {void Function(T value) changesListener, List<Validator> validators, List<FutureValidator> futureValidators}) {
-    _name = name;
-    _setValue(_originalValue = _value = value);
+  FormControl(
+    String name,
+    T value, {
+    void Function(T value)? changesListener,
+    List<Validator>? validators,
+    List<FutureValidator>? futureValidators,
+  })  : _name = name,
+        _value = value,
+        _originalValue = value,
+        _valueStream = ValueStream<T>(value),
+        _dirtyStream = ValueStream<bool>(false),
+        _statusStream = ValueStream<ControlStatus>(ControlStatus.valid),
+        _errorsStream = ValueStream<List<String>>(<String>[]) {
     _changesListener = changesListener;
     setValidators(validators);
     setFutureValidators(futureValidators);
+    _setValue(value, markAsDirty: false);
   }
 
-  int _changesCount = 0;
-  bool _internalSet = false;
-  TextEditingController _attachedController;
-  List<Validator> _validators = [];
-  List<FutureValidator> _futureValidators = [];
-  
-  BehaviorSubject<T> _valueStream = BehaviorSubject<T>();
-  Stream<T> get valueStream => _valueStream;
+  final String _name;
+  String get name => _name;
 
-  BehaviorSubject<bool> _dirtyStream = BehaviorSubject.seeded(false);
-  Stream<bool> get dirtyStream => _dirtyStream;
+  final ValueStream<T> _valueStream;
+  Stream<T> get valueStream => _valueStream.stream;
+
+  final ValueStream<bool> _dirtyStream;
+  Stream<bool> get dirtyStream => _dirtyStream.stream;
   bool get dirty => _dirtyStream.value;
 
-  BehaviorSubject<ControlStatus> _statusStream = BehaviorSubject<ControlStatus>.seeded(ControlStatus.valid);
-  Stream<ControlStatus> get statusStream => _statusStream;
+  final ValueStream<ControlStatus> _statusStream;
+  Stream<ControlStatus> get statusStream => _statusStream.stream;
   bool get valid => _statusStream.value == ControlStatus.valid;
   bool get invalid => _statusStream.value == ControlStatus.invalid;
   bool get pending => _statusStream.value == ControlStatus.pending;
 
-  BehaviorSubject<List<String>> _errorsStream = BehaviorSubject<List<String>>.seeded([]);
-  Stream<List<String>> get errors => _errorsStream;
+  final ValueStream<List<String>> _errorsStream;
+  Stream<List<String>> get errors => _errorsStream.stream;
   List<String> getErrors() => _errorsStream.value;
-  String get firstError => getErrors().length > 0 ? getErrors()[0] : null;
-  String get firstErrorIfTouched => _touched ? firstError : null;
- 
+  String? get firstError => getErrors().isEmpty ? null : getErrors().first;
+  String? get firstErrorIfTouched => _touched ? firstError : null;
+
   T _originalValue;
   T _value;
   T get value => _value;
   set value(T value) => _setValue(value);
-  // T getValue() => _value;
-  // void setValue(T value) => _setValue(value);
 
-  String _name;
-  String get name => _name;
-  
   bool _touched = false;
   bool get touched => _touched;
 
-  void Function(T value) _changesListener;
-  
-  setValidators(List<Validator> validators) {
-    _validators = validators;
-    if (_validators == null) {
-      _validators = [];
-    }
-  }
-  
-  setFutureValidators(List<FutureValidator> futureValidators) {
-    _futureValidators = futureValidators;
-    if (_futureValidators == null) {
-      _futureValidators = [];
-    }
+  int _changesCount = 0;
+  bool _internalSet = false;
+  TextEditingController? _attachedController;
+  List<Validator> _validators = <Validator>[];
+  List<FutureValidator> _futureValidators = <FutureValidator>[];
+  void Function(T value)? _changesListener;
+
+  void setValidators(List<Validator>? validators) {
+    _validators = validators ?? <Validator>[];
   }
 
-  Future validate() async {
+  void setFutureValidators(List<FutureValidator>? futureValidators) {
+    _futureValidators = futureValidators ?? <FutureValidator>[];
+  }
+
+  Future<void> validate() async {
     _statusStream.add(ControlStatus.pending);
 
-    List<String> errors = [];
-
-    _validators.forEach((f) {
-      var error = f.validate(_value);
+    final List<String> errors = <String>[];
+    for (final validator in _validators) {
+      final error = validator.validate(_value);
       if (error != null && error.isNotEmpty) {
         errors.add(error);
       }
-    });
-
-    // update errors
-    _errorsStream.add(errors);
-    
-    // update valid status
-    var hasErrors = errors.length > 0;
-    if (hasErrors) {
-      _statusStream.add(ControlStatus.invalid);
     }
-    else if (_futureValidators.length > 0) {
 
-      var futures = <Future<String>>[];
-      _futureValidators.forEach((f) {
-        futures.add(f.validate(_value));
-      });
+    _errorsStream.add(errors);
 
-      // Future.wait(futures).then((errors) {
-      //   _errors.add(errors.where((error) => error != null && error.isNotEmpty));
-      //   // update valid status
-      //   var hasErrors = _errors.value.length > 0;
-      //   if (hasErrors) {
-      //     _status.add(ControlStatus.invalid);
-      //   }
-      //   else {
-      //     _status.add(ControlStatus.valid);
-      //   }
-      // });
-
-      final errors = await Future.wait(futures);
-      _errorsStream.add(errors.where((error) => error != null && error.isNotEmpty));
-      // update valid status
-      var hasErrors = _errorsStream.value.length > 0;
-      if (hasErrors) {
+    if (errors.isNotEmpty) {
+      _statusStream.add(ControlStatus.invalid);
+    } else if (_futureValidators.isNotEmpty) {
+      final futures = <Future<String?>>[
+        for (final validator in _futureValidators) validator.validate(_value),
+      ];
+      final results = await Future.wait(futures);
+      final futureErrors = <String>[
+        for (final error in results)
+          if (error != null && error.isNotEmpty) error,
+      ];
+      _errorsStream.add(futureErrors);
+      if (futureErrors.isNotEmpty) {
         _statusStream.add(ControlStatus.invalid);
-      }
-      else {
+      } else {
         _statusStream.add(ControlStatus.valid);
       }
-
-    }
-    else {
+    } else {
       _statusStream.add(ControlStatus.valid);
     }
   }
@@ -134,7 +112,6 @@ class FormControl<T> {
       _dirtyStream.value = true;
     }
 
-    // set value
     _value = value;
     _valueStream.add(value);
 
@@ -142,12 +119,8 @@ class FormControl<T> {
       _setControllerValue();
     }
 
-    // run validators
     validate();
-
-    if (_changesListener != null) {
-      _changesListener(value);
-    }
+    _changesListener?.call(value);
   }
 
   void reset(T value) {
@@ -166,41 +139,44 @@ class FormControl<T> {
 
   void attachTextEditingController(TextEditingController controller) {
     _attachedController = controller;
-    _attachedController.addListener(_controllerValueChanged);
+    _attachedController!.addListener(_controllerValueChanged);
 
     if (_value != null) {
       _setControllerValue();
     }
   }
-  
+
   void _controllerValueChanged() {
     if (_internalSet) {
       return;
     }
 
-    // first time for (focus) event
-    // second time for (blur) event or typing
+    // First change comes from the focus event, subsequent ones from typing or
+    // blur, which is what we treat as "touched".
     _touched = ++_changesCount > 1;
 
-    final Object val = _attachedController.text;
-    _setValue(val, internalSet: true);
+    _setValue(_attachedController!.text as T, internalSet: true);
   }
-  
+
   void _setControllerValue() {
-    if (_attachedController == null) {
+    final controller = _attachedController;
+    if (controller == null) {
       return;
     }
 
     _internalSet = true;
-    _attachedController.text = _value.toString();
+    controller.text = _value.toString();
     _internalSet = false;
   }
 
   void dispose() {
-    if (_attachedController != null) {
-      _attachedController.removeListener(_controllerValueChanged);
-      _attachedController.clear();
-      _attachedController.dispose();
-    }
+    _attachedController?.removeListener(_controllerValueChanged);
+    _attachedController?.clear();
+    _attachedController?.dispose();
+    _attachedController = null;
+    _valueStream.close();
+    _dirtyStream.close();
+    _statusStream.close();
+    _errorsStream.close();
   }
 }

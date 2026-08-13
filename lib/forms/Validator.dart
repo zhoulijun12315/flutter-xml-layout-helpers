@@ -1,33 +1,29 @@
-typedef ValidateFn<T, V> = T Function(V value);
+typedef ValidateFn<T, V> = T Function(V? value);
 
 abstract class Validator {
-  String validate(Object value) {
-    return null;
-  }
+  /// Returns an error message if [value] is invalid, or `null` when valid.
+  String? validate(Object? value) => null;
 }
 
 class FutureValidator {
-  ValidateFn<Future<String>, Object> _validateFn;
-
   FutureValidator(this._validateFn);
 
-  Future<String> validate(Object value) {
-    return _validateFn(value);
-  }
+  final ValidateFn<Future<String?>, Object> _validateFn;
+
+  Future<String?> validate(Object? value) => _validateFn(value);
 }
 
 class FnValidator extends Validator {
-  ValidateFn<String, Object> _validateFn;
-
   FnValidator(this._validateFn);
 
-  String validate(Object value) {
-    return _validateFn(value);
-  }
+  final ValidateFn<String?, Object> _validateFn;
+
+  @override
+  String? validate(Object? value) => _validateFn(value);
 }
 
 class Validators {
-  static FnValidator required = new FnValidator((value) {
+  static final FnValidator required = FnValidator((value) {
     if (value != null && value is String && value.isNotEmpty) {
       return null;
     }

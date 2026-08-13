@@ -1,4 +1,4 @@
-library flutter_xmllayout_helpers;
+library flutter_xml_layout_helpers;
 
 export 'forms/FormControl.dart';
 export 'forms/FormGroup.dart';
