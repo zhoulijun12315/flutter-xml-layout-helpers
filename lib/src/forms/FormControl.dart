@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import '../src/value_stream.dart';
+import '../value_stream.dart';
 import 'Validator.dart';
 
 enum ControlStatus { valid, invalid, pending, disabled }

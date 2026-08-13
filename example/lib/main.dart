@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_xml_layout_helpers/flutter_xml_layout_helpers.dart';
+import 'package:flutter_xml_layout_helpers/headers.dart';
 import 'package:provider/provider.dart';
 
 import 'demo/demo_page.xml.dart';

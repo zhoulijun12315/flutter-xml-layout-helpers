@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:flutter_xml_layout_helpers/flutter_xml_layout_helpers.dart';
+import 'package:flutter_xml_layout_helpers/headers.dart';
 import 'package:flutter_xml_layout_helpers/headers.dart' as headers;
 import 'package:flutter_xml_layout_helpers/src/value_stream.dart';
 
@@ -224,6 +224,15 @@ void main() {
     test('ifTrue falls back to SizedBox when falseWidget is null', () {
       final widget = WidgetHelpers.ifTrue(false, () => const Text('yes'));
       expect(widget, isA<SizedBox>());
+    });
+
+    test('ifTrue treats a null condition as false', () {
+      final widget = WidgetHelpers.ifTrue(
+        null,
+        () => const Text('yes'),
+        () => const Text('no'),
+      );
+      expect(widget, isA<Text>());
     });
 
     test('ifElseChain picks the first true case', () {

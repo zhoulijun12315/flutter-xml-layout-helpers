@@ -20,4 +20,11 @@ Add submitEnabledStream.
   branches, unused animation listeners, and stream/controller leaks.
 - Added basic unit tests for forms, helpers and pipes.
 
+## Unreleased
+
+- `headers.dart` is now the single public entry point; implementations moved
+  to `lib/src/` (removed the old `flutter_xml_layout_helpers.dart` main file).
+- `WidgetHelpers.ifTrue` accepts a nullable condition (`null` is treated as
+  `false`), matching pre-null-safety behavior for optional `bool` params.
+
 ## [0.0.6] - 3-7-2020.

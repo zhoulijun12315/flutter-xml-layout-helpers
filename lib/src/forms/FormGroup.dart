@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../src/value_stream.dart';
+import '../value_stream.dart';
 import 'FormControl.dart';
 import 'Validator.dart';
 

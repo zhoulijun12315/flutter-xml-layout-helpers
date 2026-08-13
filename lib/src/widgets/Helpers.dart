@@ -15,9 +15,9 @@ class WidgetHelpers {
     return result;
   }
 
-  static Widget ifTrue(bool condition, Widget Function() trueWidget,
+  static Widget ifTrue(bool? condition, Widget Function() trueWidget,
       [Widget Function()? falseWidget]) {
-    if (condition) {
+    if (condition == true) {
       return trueWidget();
     }
     return falseWidget != null ? falseWidget() : const SizedBox.shrink();

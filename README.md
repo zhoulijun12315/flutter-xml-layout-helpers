@@ -43,11 +43,11 @@ dependencies:
 import 'package:flutter_xml_layout_helpers/headers.dart';
 ```
 
-**One import for everything.** `headers.dart` (or the equivalent main library
-`flutter_xml_layout_helpers.dart`) exports every class: `PipeProvider`, `Pipe`,
-`FormControl`, `FormGroup`, `Validators`, `WidgetHelpers`, `Disable`,
-`AnimationBuilder` and friends. You never need deep imports like
-`providers/PipeProvider.dart`.
+**One import for everything.** `headers.dart` is the only public entry point
+and exports every class: `PipeProvider`, `Pipe`, `FormControl`, `FormGroup`,
+`Validators`, `WidgetHelpers`, `Disable`, `AnimationBuilder` and friends.
+Implementation files live under `lib/src/` and are not part of the public API,
+so IDEs only ever suggest `headers.dart` — no scattered deep imports.
 
 Migrating old scattered imports in one shot:
 
