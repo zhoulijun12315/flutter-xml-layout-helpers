@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -412,6 +414,39 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('animated'), findsOneWidget);
+    });
+  });
+
+  group('MultiStreamBuilder', () {
+    testWidgets('rebuilds when any watched stream emits', (tester) async {
+      final first = StreamController<int>.broadcast(sync: true);
+      final second = StreamController<int>.broadcast(sync: true);
+      addTearDown(first.close);
+      addTearDown(second.close);
+
+      var rebuilds = 0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MultiStreamBuilder(
+            streams: <Stream<dynamic>>[first.stream, second.stream],
+            builder: (context, values) {
+              rebuilds++;
+              return Text('rebuilds: $rebuilds');
+            },
+          ),
+        ),
+      );
+
+      expect(find.text('rebuilds: 1'), findsOneWidget);
+
+      first.add(1);
+      await tester.pump();
+      expect(find.text('rebuilds: 2'), findsOneWidget);
+
+      second.add(2);
+      await tester.pump();
+      expect(find.text('rebuilds: 3'), findsOneWidget);
     });
   });
 

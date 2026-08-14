@@ -1127,6 +1127,59 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                         ],
                       ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                      child: Text(
+                        ':watch 监听多个流，任一变化就重建 →',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    MultiStreamBuilder(
+                      streams: [ctrl.tapCountStream, ctrl.longPressCountStream],
+                      builder: (BuildContext context, List<dynamic> values) {
+                        return Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Container(
+                            color: Colors.teal.shade50,
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: StreamBuilder(
+                                initialData: 0,
+                                stream: ctrl.longPressCountStream,
+                                builder: (BuildContext context,
+                                    ctrlLongPressCountStreamSnapshot) {
+                                  final ctrlLongPressCountStreamValue =
+                                      ctrlLongPressCountStreamSnapshot.data;
+                                  if (ctrlLongPressCountStreamValue == null) {
+                                    return Container(width: 0, height: 0);
+                                  }
+                                  return StreamBuilder(
+                                    initialData: 0,
+                                    stream: ctrl.tapCountStream,
+                                    builder: (BuildContext context,
+                                        ctrlTapCountStreamSnapshot) {
+                                      final ctrlTapCountStreamValue =
+                                          ctrlTapCountStreamSnapshot.data;
+                                      if (ctrlTapCountStreamValue == null) {
+                                        return Container(width: 0, height: 0);
+                                      }
+                                      return Text(
+                                        'taps → ' +
+                                            (ctrlTapCountStreamValue)
+                                                .toString() +
+                                            ' · long → ' +
+                                            (ctrlLongPressCountStreamValue)
+                                                .toString(),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),

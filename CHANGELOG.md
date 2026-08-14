@@ -31,5 +31,7 @@ Add submitEnabledStream.
   now marks the control invalid instead of surfacing as an unhandled async
   error; `AnimationBuilder` tracks disposal with a real flag instead of a
   broken `toString()` check; pubspec homepage now points at the actual repo.
+- Added `MultiStreamBuilder`: rebuilds a subtree when any of several streams
+  emits (backing the generator's new `:watch` wrapper).
 
 ## [0.0.6] - 3-7-2020.

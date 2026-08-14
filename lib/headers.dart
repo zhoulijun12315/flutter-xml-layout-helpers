@@ -19,3 +19,4 @@ export 'src/providers/PipeProvider.dart';
 export 'src/widgets/Disable.dart';
 export 'src/widgets/Helpers.dart';
 export 'src/widgets/AnimationBuilder.dart';
+export 'src/widgets/MultiStreamBuilder.dart';

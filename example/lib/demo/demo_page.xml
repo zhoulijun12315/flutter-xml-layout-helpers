@@ -269,6 +269,10 @@
                   <Text text="'2'" />
                 </TextButton>
               </Row>
+              <Text :margin="10 0 0 0" text="':watch 监听多个流，任一变化就重建 →'" style="Theme.of(context).textTheme.bodyMedium" />
+              <Container :margin="4" :watch="ctrl.tapCountStream, ctrl.longPressCountStream" :padding="10" color="Colors.teal.shade50">
+                <Text text="'taps → ' + (ctrl.tapCountStream | stream:0).toString() + ' · long → ' + (ctrl.longPressCountStream | stream:0).toString()" />
+              </Container>
             </Column>
           </DemoSection>
 

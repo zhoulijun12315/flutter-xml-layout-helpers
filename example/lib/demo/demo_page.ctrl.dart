@@ -147,6 +147,9 @@ class DemoController extends DemoControllerBase {
   <Container :opacity="selectedTabValue == 1 ? 1 : 0.15"
              color="Colors.pink.shade100" />
 </Stack>
+<Container :watch="ctrl.tapCountStream, ctrl.longPressCountStream">
+  <Text text="'taps → ' + (ctrl.tapCountStream | stream:0).toString()" />
+</Container>
 ''';
 
   String get i18nXml => r'''
