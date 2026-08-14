@@ -567,11 +567,7 @@ class _DemoPageState extends State<DemoPage> with TickerProviderStateMixin {
                         child: ListView.builder(
                           itemCount: ctrl.demoItems.length,
                           itemBuilder: (BuildContext context, int index) {
-                            final DemoItem item = ctrl.demoItems == null ||
-                                    ctrl.demoItems.length <= index ||
-                                    ctrl.demoItems.length == 0
-                                ? null!
-                                : ctrl.demoItems[index];
+                            final DemoItem item = ctrl.demoItems[index];
                             return ListTile(
                               dense: true,
                               leading: CircleAvatar(
