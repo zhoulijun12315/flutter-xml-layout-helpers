@@ -2,7 +2,7 @@ name: flutter_xml_layout_helpers
 description: >-
   Helper widgets & classes for the XML Layout for Flutter (Ark7) VSCode
   extension. Maintained fork of flutter_xmllayout_helpers.
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/zhoulijun12315/flutter-xml-layout-helpers
 
 environment:

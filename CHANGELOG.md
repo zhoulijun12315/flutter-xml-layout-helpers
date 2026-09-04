@@ -20,6 +20,12 @@ Add submitEnabledStream.
   branches, unused animation listeners, and stream/controller leaks.
 - Added basic unit tests for forms, helpers and pipes.
 
+## [0.1.1] - 2026-09-04
+
+- Detect OpenHarmony(OHOS) in `_platformMatches` via `defaultTargetPlatform.name`
+  instead of `case TargetPlatform.ohos`, so the package compiles on both the
+  standard Flutter SDK (which has no `ohos` member) and the OHOS fork.
+
 ## Unreleased
 
 - `headers.dart` is now the single public entry point; implementations moved

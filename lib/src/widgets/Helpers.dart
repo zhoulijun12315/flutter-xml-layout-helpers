@@ -107,6 +107,14 @@ class WidgetHelpers {
     if (kIsWeb) {
       return platform == 'web';
     }
+    // 兼容鸿蒙(OHOS)：鸿蒙 Flutter SDK 的 TargetPlatform 额外包含 ohos 成员，
+    // 而标准 Flutter SDK 没有该成员，直接 `case TargetPlatform.ohos`
+    // 会导致标准 SDK 报 "Member not found: 'ohos'" 而编译失败。
+    // 这里改用枚举名称做运行时判断，并在 switch 之后兜底返回 false，
+    // 使同一份源码在标准 SDK 与鸿蒙 SDK 下都能编译。
+    if (defaultTargetPlatform.name == 'ohos') {
+      return platform == 'ohos';
+    }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return platform == 'android';
@@ -121,6 +129,9 @@ class WidgetHelpers {
       case TargetPlatform.fuchsia:
         return platform == 'fuchsia';
     }
+    // 兜底：鸿蒙 SDK 下 TargetPlatform 含标准 SDK 不存在的成员，
+    // 此处作为未匹配分支的返回值（标准 SDK 下不可达）。
+    return false;
   }
 
   static dynamic onPlatformProperty({
